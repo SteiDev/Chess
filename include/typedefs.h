@@ -1,16 +1,45 @@
-#ifndef TYPEDEFS_H
-#define TYPRDEFS_H
+#ifndef __TYPEDEFS_H__
+#define __TYPEDEFS_H__
 
-typedef signed char i8;
-typedef char u8;
-typedef short i16;
-typedef unsigned short u16;
-typedef int i32;
-typedef unsigned int u32;
-typedef long long i64;
-typedef unsigned long long u64;
-typedef float f32;
-typedef double f64;
+#ifndef i8
+    typedef signed char i8;
+#endif
+
+#ifndef u8
+    typedef char u8;
+#endif
+
+#ifndef i16
+    typedef short i16;
+#endif
+
+#ifndef u16
+    typedef unsigned short u16;
+#endif
+
+#ifndef i32
+    typedef int i32;
+#endif
+
+#ifndef u32
+    typedef unsigned int u32;
+#endif
+
+#ifndef i64
+    typedef long long i64;
+#endif
+
+#ifndef u64
+    typedef unsigned long long u64;
+#endif
+
+#ifndef f32
+    typedef float f32;
+#endif
+
+#ifndef f64
+    typedef double f64;
+#endif
 
 #ifndef true
     #define true 1
@@ -20,7 +49,11 @@ typedef double f64;
     #define false 0
 #endif
 
-typedef _Bool bool;
+#ifndef ____cplusplus
+    #ifndef bool
+        typedef _Bool bool;
+    #endif
+#endif
 
 #ifndef NULL
     #define NULL ((void*)0)
@@ -32,4 +65,4 @@ typedef _Bool bool;
     // #define __attribute_pure__ PURE_FUNC
 #endif
 
-#endif // end of TYPEDEFS_H
+#endif // end of __TYPEDEFS_H__

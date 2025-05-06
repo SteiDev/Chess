@@ -30,7 +30,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
     }else{
         for(u16 allocIndex = 0; allocIndex < boardSizeY; ++allocIndex){
             mainBoard[allocIndex] = (playerPiece_t*)malloc(sizeof(playerPiece_t) * boardSizeX);
-            CheckCriticalOperation((playerPiece_t*)mainBoard[allocIndex], "Fatal Error: board tiles allocation failed (Board_Init)\n");
+            Exception_CheckCriticalOperation((playerPiece_t*)mainBoard[allocIndex], "Fatal Error: board tiles allocation failed (Board_Init)\n");
         }
     }
 
@@ -72,7 +72,7 @@ void Board_Print(playerPiece_t** inpboard, const u16 Xsize, const u16 Ysize){
     printf("\n");
 }
 
-void Board_Settings_General(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen){
+void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen){
     i8 skip_loading_screen_buffer = 0;
     FILE* ini_ptr = NULL;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
@@ -85,18 +85,18 @@ void Board_Settings_General(const u8* restrict ini_filename, u16* XBoardCoord, u
     }
     
     ini_ptr = fopen(ini_filename, "r");
-    CheckCriticalOperation((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Settings_General)\n");
+    Exception_CheckCriticalOperation((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Settings_General)\n");
 
     // check the ini file format
     // make an algorithm to fallback on default values if the file is not correct
     if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
         if(strcmp(ini_filecontent, "[general]\n") != 0){  // fgets also gets the newline terminator \n
-            SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
+            Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
         }else{
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
                 sscanf(ini_filecontent, "table_size = %hux%hu", XBoardCoord, YBoardCoord);
             }else{
-                SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
+                Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
                 sscanf(ini_filecontent, "show_loading_screen = %hhd", &skip_loading_screen_buffer);  // still no bool format specifier in 2025
@@ -106,17 +106,17 @@ void Board_Settings_General(const u8* restrict ini_filename, u16* XBoardCoord, u
                     *skip_loading_screen = true;
                 }
             }else{
-                SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
+                Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
         }
     }else{
-        SendWarning("Warning: Incompatible Ini file format (Board_Settings_General)\n");
+        Exception_SendWarning("Warning: Incompatible Ini file format (Board_Settings_General)\n");
     }
 
     fclose(ini_ptr);
 }
 
-void Board_Placement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord){
+void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord){
     FILE* ini_ptr = NULL;
     playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE};
     u16 XBoard_Placement_Buffer = 0;
@@ -125,18 +125,18 @@ void Board_Placement(const u8* restrict ini_filename, playerPiece_t*** main_boar
 
     printf(LOADING_MESSAGE_PIECES_EN);
 
-    CheckCriticalOperation((u8*)ini_filename, "Type Error: Invalid ini filename (Board_Placement)\n");
+    Exception_CheckCriticalOperation((u8*)ini_filename, "Type Error: Invalid ini filename (Board_Placement)\n");
     
     ini_ptr = fopen(ini_filename, "r");
-    CheckCriticalOperation((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Placement)\n");
+    Exception_CheckCriticalOperation((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Placement)\n");
     
     if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
         if(strcmp(ini_filecontent, "[layout]\n") != 0){  // fgets also gets the newline terminator \n
-            SendWarning("Warning: Incompatible Ini file content (Board_Placement)\n");
+            Exception_SendWarning("Warning: Incompatible Ini file content (Board_Placement)\n");
         }else{
             while(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
                 sscanf(ini_filecontent, "piece = %c[%hu][%hu], color = %c", (u8*)&piece_Placement_Buffer.pieceType, &YBoard_Placement_Buffer, &XBoard_Placement_Buffer, (u8*)&piece_Placement_Buffer.pieceColor);
-                if(CheckBounds(XBoard_Placement_Buffer, YBoard_Placement_Buffer, XBoardCoord, YBoardCoord, false) == IN_BOUNDS){
+                if(Exception_CheckBounds(XBoard_Placement_Buffer, YBoard_Placement_Buffer, XBoardCoord, YBoardCoord, false) == IN_BOUNDS){
                     (*main_board_ptr)[YBoard_Placement_Buffer][XBoard_Placement_Buffer].pieceColor = piece_Placement_Buffer.pieceColor;
                     (*main_board_ptr)[YBoard_Placement_Buffer][XBoard_Placement_Buffer].pieceType = piece_Placement_Buffer.pieceType;
                 }
@@ -156,7 +156,7 @@ void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord){
     free((*main_board_ptr));
 }
 
-void Board_Turn_Read(playerPiece_t** restrict mainBoard, const __color_t currentColor, u16* fromCoordsX, u16* fromCoordsY, u16* toCoordsX, u16* toCoordsY, const u16 XBoardCoord, const u16 YBoardCoord){
+void Board_Turn_ReadAndValidate(playerPiece_t** restrict mainBoard, const __color_t currentColor, u16* fromCoordsX, u16* fromCoordsY, u16* toCoordsX, u16* toCoordsY, const u16 XBoardCoord, const u16 YBoardCoord){
     u8 turnColor[__TURN_COLOR_MAX_SIZE__];
     u8 aux_fromCoordsX = 0;
     u8 aux_toCoordsX = 0;
@@ -170,7 +170,7 @@ void Board_Turn_Read(playerPiece_t** restrict mainBoard, const __color_t current
             strcpy(turnColor, "Black");
             break;
         default:
-            SendWarning("Warning: Invalid Color Turn (Board_Turn)\n");
+            Exception_SendWarning("Warning: Invalid Color Turn (Board_Turn)\n");
     }
 
     printf("\n%s's Turn\n\n", turnColor);
@@ -183,23 +183,23 @@ void Board_Turn_Read(playerPiece_t** restrict mainBoard, const __color_t current
                 scanf(" %c %hu", &aux_fromCoordsX, fromCoordsY);
         
                 *fromCoordsX = toupper(aux_fromCoordsX);
-                *fromCoordsX = LETTER_TO_NUM(*fromCoordsX);
+                *fromCoordsX = UPPERLETTER_TO_NUM(*fromCoordsX);
                 *fromCoordsX = (*fromCoordsX) - 1;  // ajust for chessboard indexing from 1
                 *fromCoordsY = (*fromCoordsY) - 1;
         
-            }while(CheckBounds(*fromCoordsX, *fromCoordsY, XBoardCoord, YBoardCoord, false) != IN_BOUNDS);
-        }while(CheckPieceOwner(mainBoard, *fromCoordsX, *fromCoordsY, currentColor) != VALID_OWNER);
+            }while(Exception_CheckBounds(*fromCoordsX, *fromCoordsY, XBoardCoord, YBoardCoord, false) != IN_BOUNDS);
+        }while(Piece_CheckOwner(mainBoard, *fromCoordsX, *fromCoordsY, currentColor) != VALID_OWNER);
         
         do{
             printf("Enter the location to move the piece to: ");
             scanf(" %c %hu", &aux_toCoordsX, toCoordsY);
     
             *toCoordsX = toupper(aux_toCoordsX);
-            *toCoordsX = LETTER_TO_NUM(*toCoordsX);
+            *toCoordsX = UPPERLETTER_TO_NUM(*toCoordsX);
             *toCoordsX = (*toCoordsX) - 1;
             *toCoordsY = (*toCoordsY) - 1;
     
-        }while(CheckBounds(*toCoordsX, *toCoordsY, XBoardCoord, YBoardCoord, false) != IN_BOUNDS);
+        }while(Exception_CheckBounds(*toCoordsX, *toCoordsY, XBoardCoord, YBoardCoord, false) != IN_BOUNDS);
     
         switch(mainBoard[*fromCoordsY][*fromCoordsX].pieceType){
             case pawn:
@@ -228,7 +228,7 @@ void Board_Turn_Read(playerPiece_t** restrict mainBoard, const __color_t current
 }
 
 void Board_Turn_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
-    MovePiece(board_ptr, fromX, fromY, toX, toY);
+    Piece_Move(board_ptr, fromX, fromY, toX, toY);
 }
 
 void Board_Turn_Counter(u16* restrict turnCount){
@@ -245,6 +245,42 @@ void Board_Turn_NextColor(__color_t* restrict color_ptr){
             *color_ptr = white;
             break;
         default:
-            SendWarning("Warning: Invalid turn color (Board_Turn_NextColor)\n");
+            Exception_SendWarning("Warning: Invalid turn color (Board_Turn_NextColor)\n");
+    }
+}
+
+// needs to be checked for NULL pointers at fopen and at fclose
+void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename){
+    FILE* saveFile_ptr = NULL;
+
+    saveFile_ptr = fopen(filename, "w");
+
+    fprintf(saveFile_ptr, "[layout]\n");
+
+    for(u16 boardIndexY = 0; boardIndexY < YBoardCoord; ++boardIndexY){
+        for(u16 boardIndexX = 0; boardIndexX < XBoardCoord; ++boardIndexX){
+            if(mainBoard[boardIndexY][boardIndexX].pieceColor != color_NONE){
+                fprintf(saveFile_ptr, "piece = %c[%hu][%hu], color = %c\n", mainBoard[boardIndexY][boardIndexX].pieceType, boardIndexY, boardIndexX, mainBoard[boardIndexY][boardIndexX].pieceColor);
+            }
+        }
+    }
+
+    // check when it is closed
+    fclose(saveFile_ptr);
+}
+
+// quick and dirty implementation that probably needs to be fixed later
+bool Board_Save_LoadGame(u8* restrict loadPrompt){
+    u8 keyboardLetter = 0;
+
+    printf("%s\n", loadPrompt);
+    scanf(" %c", &keyboardLetter);
+
+    keyboardLetter = toupper(keyboardLetter);
+
+    if(keyboardLetter != 'Y'){
+        return false;
+    }else{
+        return true;
     }
 }

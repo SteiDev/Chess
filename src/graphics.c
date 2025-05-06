@@ -1,25 +1,26 @@
 #include "../include/graphics.h"
+#include "../include/typedefs.h"
+#include "../include/gameTexts.h"
 
-void TestRay(void) {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u16 targetFPS) {
+    InitWindow(screenWidth, screenHeight, WINDOW_TITLE);
+    SetTargetFPS(targetFPS);
+}
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY) {
+    Color color = {0};
+    Vector2 position = {0};
 
-    SetTargetFPS(60);               // Set the game to run at 60 frames-per-second
-
-    // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
-        BeginDrawing();
-
-        ClearBackground(RAYWHITE);
-
-        DrawText("Hello, raylib!", 350, 200, 20, LIGHTGRAY);
-
-        EndDrawing();
+    for (u16 row = 0; row < boardSizeY; row++) {
+        for (u16 col = 0; col < boardSizeX; col++) {
+            if((row + col) % 2 == 0){
+                color = DARKGRAY;
+            } else {
+                color = LIGHTGRAY;
+            }
+            position.x = col * SQUARE_SIZE;
+            position.y = row * SQUARE_SIZE;
+            DrawRectangleV(position, (Vector2){SQUARE_SIZE, SQUARE_SIZE}, color);
+        }
     }
-
-    // De-Initialization
-    CloseWindow();
 }

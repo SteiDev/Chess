@@ -8,9 +8,6 @@
 #include <string.h>
 #include <limits.h>
 
-#define __MISMATCHED_PIECE__ 1
-#define __CORRECT_PIECE__ 0
-
 #define __CAN_MOVE__ 0
 #define __CAN_MOVE_AND_CAPTURE__ 1
 #define __CANNOT_MOVE__ 2
@@ -43,7 +40,7 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u
                 strcpy(lostColor, "Black");
                 break;
             default:
-                SendWarning("Warning: Invalid lost color (__MovePiece__)\n");
+                Exception_SendWarning("Warning: Invalid lost color (__MovePiece__)\n");
         }
         switch((*board_ptr)[toY][toX].pieceType){
             case pawn:
@@ -65,7 +62,7 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u
                 strcpy(lostPiece, "King");
                 break;
             default:
-            SendWarning("Warning: Invalid lost piece (__MovePiece__)\n");
+            Exception_SendWarning("Warning: Invalid lost piece (__MovePiece__)\n");
         }
 
         printf("%s lost a %s!\n", lostColor, lostPiece);
@@ -79,7 +76,7 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u
     (*board_ptr)[fromY][fromX].pieceColor = color_NONE;
 }
 
-void __CheckAndMove__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
+void __Piece_CheckAndMove__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
     bool capturePiece = false;
 
     if(__CheckTile__((*board_ptr), fromX, fromY, toX, toY) == __CANNOT_MOVE__){
@@ -95,11 +92,11 @@ void __CheckAndMove__(playerPiece_t*** restrict board_ptr, const u16 fromX, cons
 
 }
 
-void MovePiece(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
-    __CheckAndMove__(board_ptr, fromX, fromY, toX, toY);   
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
+    __Piece_CheckAndMove__(board_ptr, fromX, fromY, toX, toY);   
 }
 
-i8 CheckPieceOwner(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor){
+i8 Piece_CheckOwner(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor){
     if(mainBoard[fromY][fromX].pieceColor != currentTurnColor){
         printf("Invalid Piece Selected: select a piece of your own color!\n");
         return INVALID_OWNER;
@@ -111,21 +108,25 @@ i8 CheckPieceOwner(playerPiece_t** restrict mainBoard, const u16 fromX, const u1
 i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
     switch(mainBoard[fromY][fromX].pieceColor){
         case white:
-            if((fromX == toX) && (toY == fromY + 1)){
+            if((fromX == toX) && (toY == fromY + 1) && (mainBoard[toY][toX].pieceColor == color_NONE)){
+                return VALID_MOVE;
+            }else if(((fromX -1 == toX) || (fromX +1 == toX)) && (toY == fromY + 1) && (mainBoard[toY][toX].pieceColor == black)){
                 return VALID_MOVE;
             }else{
                 return INVALID_MOVE;
             }
             break;
         case black:
-            if((fromX == toX) && (toY == fromY - 1)){
+            if((fromX == toX) && (toY == fromY - 1) && (mainBoard[toY][toX].pieceColor == color_NONE)){
+                return VALID_MOVE;
+            }else if(((fromX -1 == toX) || (fromX +1 == toX)) && (toY == fromY - 1) && (mainBoard[toY][toX].pieceColor == white)){
                 return VALID_MOVE;
             }else{
                 return INVALID_MOVE;
             }
             break;
         default:
-            SendWarning("Warning: Invalid pawn move color (__CheckValidMove_Pawn__)\n");
+            Exception_SendWarning("Warning: Invalid pawn move color (__CheckValidMove_Pawn__)\n");
     }
     return INVALID_MOVE;
 }
@@ -134,24 +135,24 @@ i8 __CheckValidMove_Knight__(const u16 fromX, const u16 fromY, const u16 toX, co
     if(fromX > toX){
         if(fromY > toY){
             // - -
-            if((CheckBounds(fromX - 1, fromY - 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (CheckBounds(fromX - 2, fromY - 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(fromX - 1, fromY - 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX - 2, fromY - 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }else{
             // - +
-            if((CheckBounds(fromX - 1, fromY + 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (CheckBounds(fromX - 2, fromY + 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(fromX - 1, fromY + 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX - 2, fromY + 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }
     }else if(fromX < toX){
         if(fromY > toY){
             // + -
-            if((CheckBounds(fromX + 1, fromY - 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (CheckBounds(fromX + 2, fromY - 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(fromX + 1, fromY - 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX + 2, fromY - 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }else{
             // + +
-            if((CheckBounds(fromX + 1, fromY + 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (CheckBounds(fromX + 2, fromY + 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(fromX + 1, fromY + 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX + 2, fromY + 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }
