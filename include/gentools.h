@@ -5,6 +5,7 @@
 
 #include "../include/typedefs.h"
 #include "../include/gameTexts.h"
+#include "../include/graphics.h"
 
 #define EXIT_ON_FATAL_ERROR 1
 #define EXIT_ON_NONFATAL_ERROR 1
@@ -39,6 +40,8 @@ void Exception_CheckCriticalOperation(void* restrict general_ptr, const u8* rest
 // used to check if there current X and Y are outside the board bounds; returns OUT_OF_BOUNDS if the coordinates are outside the bounds, IN_BOUNDS otherwise; BOUNDS_PASS_VAR_CHECK and BOUNDS_PASS_MAX_CHECK may also be used to skip checks
 i8 Exception_CheckBounds(const u16 currentX, const u16 currentY, const u16 maxX, const u16 maxY, const bool supressWarnings);
 
+// Used to check if the raylib textures were loaded correctly
+void Exception_CheckLoadedTexture(pieceTextures_t inptexture);
 
 // [Platform independent system functions]
 

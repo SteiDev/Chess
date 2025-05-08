@@ -30,3 +30,7 @@ obj/main.o: src/main.c
 clear:
 	@rm $(OBJ) bin/$(EXENAME)
 	@@echo Files cleared successfully!
+
+debug:
+	@@echo Starting GDB...
+	@gdb bin/chessboard

@@ -1,14 +1,14 @@
 # TODO
 ## Backend
 ### Urgent:
-
 ### Important:
-
+- Add special moves
+- Add checkmate
 ### Unimportant:
-- Add fallback mechanism if reading the ini files fails
-- Add profiles for layout.ini
 
 ## Frontend
 ### Urgent:
+- Fix error loading models
 ### Important:
+- Make the GUI
 ### Unimportant:

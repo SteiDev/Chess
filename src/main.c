@@ -11,8 +11,8 @@
 #define DEBUG 1
 
 #define SLEEP_SECONDS 1
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 450
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 640
 #define TARGET_FPS 60
 
 i32 main(){
@@ -30,9 +30,12 @@ i32 main(){
     bool clicked = false;
     __color_t currentCol = white;  // white starts first
     Vector2 mousePos;
+    pieceTextures_t whiteTextures = {0};
+    pieceTextures_t blackTextures = {0};
     
     Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen);
-    
+    Graphics_LoadTextures(&whiteTextures, &blackTextures); // crashes here
+
     mainBoard = Board_Init(Xsize, Ysize);
     
     // needs to be improved
@@ -55,14 +58,17 @@ i32 main(){
         ClearBackground(RAYWHITE);
         Graphics_DrawBoard(Xsize, Ysize);
 
-        Board_Print(mainBoard, Xsize, Ysize);
-        printf("\n");
-        Board_Turn_Counter(&turnCounter);
-        Board_Turn_ReadAndValidate(mainBoard, currentCol, &fromXCoords, &fromYCoords, &toXCoords, &toYCoords, Xsize, Ysize);
-        Board_Turn_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
-        Board_Turn_NextColor(&currentCol);
+        // Board_Print(mainBoard, Xsize, Ysize);
+        // printf("\n");
+
+        Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures);
+
+        // Board_Turn_Counter(&turnCounter);
+        // Board_Turn_ReadAndValidate(mainBoard, currentCol, &fromXCoords, &fromYCoords, &toXCoords, &toYCoords, Xsize, Ysize);
+        // Board_Turn_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
+        // Board_Turn_NextColor(&currentCol);
         Sys_Sleep(SLEEP_SECONDS);
-        Sys_Clear();
+        // Sys_Clear();
 
         // this might change later
         Board_Save_SaveGame(mainBoard, Xsize, Ysize, "saves/gamesave.ini");
@@ -70,7 +76,8 @@ i32 main(){
         EndDrawing();
     }
     
-
+    CloseWindow();
+    Graphics_UnloadTextures(&whiteTextures, &blackTextures);
     Board_Free(&mainBoard, Ysize);
 
     #ifdef DEBUG

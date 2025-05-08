@@ -2,6 +2,9 @@
 
 #include "../include/gentools.h"
 #include "../include/typedefs.h"
+#include "../include/graphics.h"
+
+#include "raylib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +39,39 @@ i8 Exception_CheckBounds(const u16 currentX, const u16 currentY, const u16 maxX,
         return OUT_OF_BOUNDS;
     }else{
         return IN_BOUNDS;
+    }
+}
+
+void Exception_CheckLoadedTexture(pieceTextures_t inptexture) {
+    // This function may have some C++ stuff
+    if (inptexture.rook.id == 0) {
+    TraceLog(LOG_WARNING, "Failed to load rook texture!");
+    Exception_SendWarning("Warning: Failed to load rook texture (Exception_CheckLoadedTexture)\n");
+    }
+
+    if (inptexture.knight.id == 0) {
+        TraceLog(LOG_WARNING, "Failed to load knight texture!");
+        Exception_SendWarning("Warning: Failed to load knight texture (Exception_CheckLoadedTexture)\n");
+    }
+
+    if (inptexture.bishop.id == 0) {
+        TraceLog(LOG_WARNING, "Failed to load bishop texture!");
+        Exception_SendWarning("Warning: Failed to load bishop texture (Exception_CheckLoadedTexture)\n");
+    }
+
+    if (inptexture.queen.id == 0) {
+        TraceLog(LOG_WARNING, "Failed to load queen texture!");
+        Exception_SendWarning("Warning: Failed to load queen texture (Exception_CheckLoadedTexture)\n");
+    }
+
+    if (inptexture.king.id == 0) {
+        TraceLog(LOG_WARNING, "Failed to load king texture!");
+        Exception_SendWarning("Warning: Failed to load king texture (Exception_CheckLoadedTexture)\n");
+    }
+
+    if (inptexture.pawn.id == 0) {
+        TraceLog(LOG_WARNING, "Failed to load pawn texture!");
+        Exception_SendWarning("Warning: Failed to load pawn texture (Exception_CheckLoadedTexture)\n");
     }
 }
 
