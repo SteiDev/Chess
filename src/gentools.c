@@ -22,7 +22,7 @@ void Exception_SendWarning(const u8* restrict warningMsg){
     #endif
 }
 
-void Exception_CheckCriticalOperation(void* restrict general_ptr, const u8* restrict errorMsg){
+void Exception_CheckNULLPtr(void* restrict general_ptr, const u8* restrict errorMsg){
     if(general_ptr == NULL){
         fprintf(stderr, "%s", errorMsg);
         #ifdef EXIT_ON_FATAL_ERROR
@@ -31,9 +31,9 @@ void Exception_CheckCriticalOperation(void* restrict general_ptr, const u8* rest
     }
 }
 
-i8 Exception_CheckBounds(const u16 currentX, const u16 currentY, const u16 maxX, const u16 maxY, const bool supressWarnings){
+i8 Exception_CheckBounds(const u16 currentX, const u16 currentY, const u16 maxX, const u16 maxY, const bool suppressWarnings){
     if((currentX >= maxX) || (currentY >= maxY)){
-        if(supressWarnings != true){
+        if(suppressWarnings == false){
             Exception_SendWarning("Warning: trying to set pieces out bounds (CheckBounds)\n");
         }
         return OUT_OF_BOUNDS;
@@ -43,7 +43,6 @@ i8 Exception_CheckBounds(const u16 currentX, const u16 currentY, const u16 maxX,
 }
 
 void Exception_CheckLoadedTexture(pieceTextures_t inptexture) {
-    // This function may have some C++ stuff
     if (inptexture.rook.id == 0) {
     TraceLog(LOG_WARNING, "Failed to load rook texture!");
     Exception_SendWarning("Warning: Failed to load rook texture (Exception_CheckLoadedTexture)\n");

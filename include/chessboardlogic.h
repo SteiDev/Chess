@@ -14,7 +14,10 @@
 
 // [Piece related structs]
 
-// Defines the struct necessary to contain every present chesspiece type
+/**
+ * @brief #### Chess pieces
+ * @brief Contains all types of pieces.
+ */
 typedef enum __chesspiece_t{
     piece_NONE = '-',
     pawn = 'p',
@@ -25,7 +28,10 @@ typedef enum __chesspiece_t{
     king = 'K'
 }__chesspiece_t;
 
-// Defines the struct necessary to contain every present chesspiece color
+/**
+ * @brief #### Chess colors
+ * @brief Contains all colors for pieces.
+ */
 typedef enum __color_t{
     color_NONE = '-',
     white = 'w',
@@ -38,7 +44,12 @@ typedef struct __pieceAttributes_t{
    bool __pawn_canMoveTwice__;  // for the ability to move 2 tiles for pawns if they havent been moved
 }__pieceAttributes_t;
 
-// Defines the struct necessary to contain all attributes of a piece
+/**
+ * @brief #### Playable piece type
+ * @brief Contains all attributes that a chess piece should have in order to be playable.
+ * @param pieceType The type of the piece.
+ * @param pieceColor the color of the piece.
+ */
 typedef struct playerPiece_t{
     __chesspiece_t pieceType;
     __color_t pieceColor;
@@ -48,19 +59,47 @@ typedef struct playerPiece_t{
 
 // General board functions
 
-// Initializes the main chessboard with default values as the return value and allocates memory on the heap for the board; if the initialization fails, exit() will be used
+/**
+ * @brief #### Initialise the main board
+ * @brief Allocates heap memory for the board and sets the default values (piece_NONE and color_NONE) for each tile.
+ * @note This function can throw exceptions
+ * @param boardSizeX The X coordinates (number of lines) of the board.
+ * @param boardSizeY The Y coordinates (number of columns) of the board.
+ * @return The initialised board.
+ */
 playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY);
 
 // Prints the current board and the letter-number coordinates; WARNING: if the table coordinates are too large, the coordinates will show up incorrectly
 void Board_Print(playerPiece_t** restrict inpboard, const u16 Xsize, const u16 Ysize);
 
-// Imports general game settings from table_config.ini; should always be used before initializing the board as the ini file also contains the size of the table
+/**
+ * @brief #### Load general settings from an ini file
+ * @brief Loads general game settings from an ini file. Should always be used before initialising the board.
+ * @note This function can throw exceptions
+ * @param ini_filename The filename for the ini file.
+ * @param XBoardCoord Pointer to the X coordinates (number of lines) of the board.
+ * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
+ * @param skip_loading_screen Skip or not the loading screens.
+ */
 void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen);
 
-// Imports the placement of the chess pieces from layout.ini
+/**
+ * @brief #### Loads the placement of the board from an ini file
+ * @brief Loads the placement of the chess pieces from the board from an ini file.
+ * @note This function can throw exceptions
+ * @param ini_filename The filename for the ini file.
+ * @param XBoardCoord The X coordinates (number of lines) of the board.
+ * @param YBoardCoord The Y coordinates (number of columns) of the board.
+ */
 void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord);
 
-// Frees the dynamically allocated memory; the freed board should not be used after this point
+/**
+ * @brief #### Free the allocated heap memory of the main board
+ * @brief Frees the allocated help memory of the main board. The board should not be used after this point.
+ * @note This function can throw exceptions
+ * @param main_board_ptr Pointer to the main board.
+ * @param YBoardCoord The Y coordinates (number of columns) of the board.
+ */
 void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord);
 
 // Turn related functions
@@ -68,16 +107,26 @@ void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord);
 // Reads the move positions (from and to) and checks if they are valid, if they are not the function will ask the user again for the positions until they are valid
 void Board_Turn_ReadAndValidate(playerPiece_t** restrict mainBoard, const __color_t currentColor, u16* fromCoordsX, u16* fromCoordsY, u16* toCoordsX, u16* toCoordsY, const u16 XBoardCoord, const u16 YBoardCoord);
 
-// Moves the piece from a position to another and checks an enemy piece is captured
-void Board_Turn_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY);
-
 // Prints the current turn and then increments the turn count by 1
 void Board_Turn_Counter(u16* restrict turnCount);
 
-// Changes color_ptr to the next color, according to the order of the players
+/**
+ * @brief #### Change the color to the next color
+ * @brief Change the color to the next color, according to the order of players.
+ * @note This function can throw exceptions
+ * @param color_ptr Pointer to the color of the current player.
+ */
 void Board_Turn_NextColor(__color_t* restrict color_ptr);
 
-// 
+/**
+ * @brief #### Save the current state of the game
+ * @brief Saves the current state of the table to an ini file.
+ * @note This function can throw exceptions
+ * @param mainBoard The main board.
+ * @param XBoardCoord The X coordinates (number of lines) of the board.
+ * @param YBoardCoord The Y coordinates (number of columns) of the board.
+ * @param filename Name of the file containing the game save.
+ */
 void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename);
 
 bool Board_Save_LoadGame(u8* restrict loadPrompt);

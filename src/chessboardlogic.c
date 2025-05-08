@@ -30,7 +30,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
     }else{
         for(u16 allocIndex = 0; allocIndex < boardSizeY; ++allocIndex){
             mainBoard[allocIndex] = (playerPiece_t*)malloc(sizeof(playerPiece_t) * boardSizeX);
-            Exception_CheckCriticalOperation((playerPiece_t*)mainBoard[allocIndex], "Fatal Error: board tiles allocation failed (Board_Init)\n");
+            Exception_CheckNULLPtr((playerPiece_t*)mainBoard[allocIndex], "Fatal Error: board tiles allocation failed (Board_Init)\n");
         }
     }
 
@@ -85,7 +85,7 @@ void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoor
     }
     
     ini_ptr = fopen(ini_filename, "r");
-    Exception_CheckCriticalOperation((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Settings_General)\n");
+    Exception_CheckNULLPtr((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Settings_General)\n");
 
     // check the ini file format
     // make an algorithm to fallback on default values if the file is not correct
@@ -125,10 +125,10 @@ void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_
 
     printf(LOADING_MESSAGE_PIECES_EN);
 
-    Exception_CheckCriticalOperation((u8*)ini_filename, "Type Error: Invalid ini filename (Board_Placement)\n");
+    Exception_CheckNULLPtr((u8*)ini_filename, "Type Error: Invalid ini filename (Board_Placement)\n");
     
     ini_ptr = fopen(ini_filename, "r");
-    Exception_CheckCriticalOperation((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Placement)\n");
+    Exception_CheckNULLPtr((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Placement)\n");
     
     if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
         if(strcmp(ini_filecontent, "[layout]\n") != 0){  // fgets also gets the newline terminator \n
@@ -227,10 +227,6 @@ void Board_Turn_ReadAndValidate(playerPiece_t** restrict mainBoard, const __colo
     }while(validPieceMove != VALID_MOVE);
 }
 
-void Board_Turn_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
-    Piece_Move(board_ptr, fromX, fromY, toX, toY);
-}
-
 void Board_Turn_Counter(u16* restrict turnCount){
     printf("Turn %u\n", *turnCount);
     *turnCount = (*turnCount) + 1;
@@ -241,7 +237,7 @@ void Board_Turn_NextColor(__color_t* restrict color_ptr){
         case white:
             *color_ptr = black;
             break;
-        case black:
+        case black: 
             *color_ptr = white;
             break;
         default:
@@ -249,11 +245,11 @@ void Board_Turn_NextColor(__color_t* restrict color_ptr){
     }
 }
 
-// needs to be checked for NULL pointers at fopen and at fclose
 void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename){
     FILE* saveFile_ptr = NULL;
 
     saveFile_ptr = fopen(filename, "w");
+    Exception_CheckNULLPtr((FILE*)saveFile_ptr, "Fatal Error: Game save failed (Board_Save_SaveGame)\n");
 
     fprintf(saveFile_ptr, "[layout]\n");
 
@@ -264,8 +260,7 @@ void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoo
             }
         }
     }
-
-    // check when it is closed
+    
     fclose(saveFile_ptr);
 }
 

@@ -1,3 +1,4 @@
 obj*
 bin*
-lib/Typedefs.h.gch
+saves*
+.vscode*

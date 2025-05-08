@@ -2,6 +2,7 @@
 #include "../include/chessboardlogic.h"
 #include "../include/gentools.h"
 #include "../include/graphics.h"
+#include "../include/pieceMoves.h"
 
 #include "raylib.h"
 
@@ -65,7 +66,7 @@ i32 main(){
 
         // Board_Turn_Counter(&turnCounter);
         // Board_Turn_ReadAndValidate(mainBoard, currentCol, &fromXCoords, &fromYCoords, &toXCoords, &toYCoords, Xsize, Ysize);
-        // Board_Turn_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
+        // Piece_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
         // Board_Turn_NextColor(&currentCol);
         Sys_Sleep(SLEEP_SECONDS);
         // Sys_Clear();
