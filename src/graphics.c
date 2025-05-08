@@ -7,8 +7,8 @@
 #include "raylib.h"
 
 static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 Xcoord, const u16 Ycoord, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces) {
-    const i32 textureX = Xcoord * SQUARE_SIZE;
-    const i32 textureY = Ycoord * SQUARE_SIZE;
+    i32 textureX = 0;
+    i32 textureY = 0;
     Texture2D loadedTexture = {0};
     Color loadedColor = {0};
 
@@ -70,6 +70,8 @@ static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 X
         default:
         Exception_SendWarning("Warning: Invalid piece texture type (__Graphics_DrawPiece__)\n");
     }
+    textureX = Xcoord * SQUARE_SIZE + (SQUARE_SIZE - loadedTexture.width) / 2;
+    textureY = Ycoord * SQUARE_SIZE + (SQUARE_SIZE - loadedTexture.height) / 2;
 
     DrawTexture(loadedTexture, textureX, textureY, loadedColor);
 }
@@ -83,8 +85,8 @@ void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY) {
     Color color = {0};
     Vector2 position = {0};
 
-    for (u16 row = 0; row < boardSizeY; row++) {
-        for (u16 col = 0; col < boardSizeX; col++) {
+    for (u16 row = 0; row < boardSizeY; ++row) {
+        for (u16 col = 0; col < boardSizeX; ++col) {
             if((row + col) % 2 == 0){
                 color = DARKGRAY;
             } else {
@@ -136,7 +138,7 @@ void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSize
     for(u16 Yindex = 0; Yindex < boardSizeY; ++Yindex) {
         for(u16 Xindex = 0; Xindex < boardSizeX; ++Xindex) {
             if(mainBoard[Yindex][Xindex].pieceColor != color_NONE) {
-                __Graphics_DrawPiece__(mainBoard[Yindex][Xindex], Xindex, Yindex, whitePieces, blackPieces);
+                __Graphics_DrawPiece__(mainBoard[Yindex][Xindex], Xindex, (boardSizeY - 1) - Yindex, whitePieces, blackPieces); // mirror the board
             }
         }
     }

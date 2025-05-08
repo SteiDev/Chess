@@ -34,8 +34,7 @@ i32 main(){
     pieceTextures_t blackTextures = {0};
     
     Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen);
-    Graphics_LoadTextures(&whiteTextures, &blackTextures); // crashes here
-
+    
     mainBoard = Board_Init(Xsize, Ysize);
     
     // needs to be improved
@@ -49,8 +48,9 @@ i32 main(){
     Board_LoadPlacement(layoutName, &mainBoard, Xsize, Ysize);
     
     Graphics_InitRaylib(WINDOW_WIDTH, WINDOW_HEIGHT, TARGET_FPS);
+    Graphics_LoadTextures(&whiteTextures, &blackTextures); // crashes here
 
-    while(WindowShouldClose() != true){
+    while(WindowShouldClose() == false){
         mousePos = GetMousePosition();
         clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
         
@@ -76,8 +76,8 @@ i32 main(){
         EndDrawing();
     }
     
-    CloseWindow();
     Graphics_UnloadTextures(&whiteTextures, &blackTextures);
+    CloseWindow();
     Board_Free(&mainBoard, Ysize);
 
     #ifdef DEBUG

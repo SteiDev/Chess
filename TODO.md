@@ -5,10 +5,12 @@
 - Add special moves
 - Add checkmate
 ### Unimportant:
+- Add AI
 
 ## Frontend
 ### Urgent:
-- Fix error loading models
+- Add moves using GUI
 ### Important:
-- Make the GUI
+- Make the rest of the GUI
 ### Unimportant:
+- Add green tiles for possible moves and red tiles for possible kills
