@@ -11,10 +11,6 @@
 
 #define DEBUG 1
 
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 640
-#define TARGET_FPS 60
-
 i32 main() {
     playerPiece_t** mainBoard = NULL;
     u16 Xsize = 0;
@@ -24,6 +20,9 @@ i32 main() {
     u16 toXCoords = 0;
     u16 toYCoords = 0;
     u16 turnCounter = 1;  // starts at turn 1
+    i32 screenWidth = 0;
+    i32 screenHeight = 0;
+    i32 fpsMax = 0;
     u8* layoutName = NULL;
     bool skip_loading_screen = false;    
     bool loadPreviousGame = false;
@@ -36,7 +35,7 @@ i32 main() {
     pieceTextures_t blackTextures = {0};
     gameState_t gameState = checkFrom;
     
-    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen);
+    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen, &fpsMax, &screenWidth, &screenHeight);
     
     mainBoard = Board_Init(Xsize, Ysize);
     
@@ -49,7 +48,7 @@ i32 main() {
     }
     
     Board_LoadPlacement(layoutName, &mainBoard, Xsize, Ysize);
-    Graphics_InitRaylib(WINDOW_WIDTH, WINDOW_HEIGHT, TARGET_FPS);
+    Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
     while(WindowShouldClose() == false) {
@@ -58,6 +57,7 @@ i32 main() {
         Graphics_DrawBoard(Xsize, Ysize, X_OFFSET, Y_OFFSET);
         
         Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, X_OFFSET, Y_OFFSET);
+        Graphics_PrintTurn(turnCounter);
 
         if(highlightSelection != false) {
             DrawRectangle((fromXCoords + X_OFFSET) * TILE_SIZE, (Ysize - fromYCoords - 1 + Y_OFFSET) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
@@ -84,7 +84,7 @@ i32 main() {
             case move:
                 Piece_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
                 Board_Turn_NextColor(&currentCol);
-                Board_Turn_Counter(&turnCounter);
+                ++turnCounter;
                 Board_Save_SaveGame(mainBoard, Xsize, Ysize, "saves/gamesave.ini");
                 gameState = checkFrom;
                 highlightSelection = false;

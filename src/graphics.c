@@ -171,3 +171,12 @@ Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f
 
     return mousePos;
 }
+
+// The text location still needs to be ajusted
+void Graphics_PrintTurn(const u16 turnCounter) {
+    u8 turnText[TURN_TEXT_LENGTH];
+    
+    sprintf(turnText, "Turn: %hu", turnCounter);
+    
+    DrawText(turnText, 8 * TILE_SIZE, 8 * TILE_SIZE, 25, DARKGRAY);
+}

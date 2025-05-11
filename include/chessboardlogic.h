@@ -80,7 +80,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY);
  * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
  * @param skip_loading_screen Skip or not the loading screens.
  */
-void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen);
+void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr);
 
 /**
  * @brief #### Loads the placement of the board from an ini file
@@ -102,9 +102,6 @@ void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_
 void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord);
 
 // Turn related functions
-
-// Prints the current turn and then increments the turn count by 1
-void Board_Turn_Counter(u16* restrict turnCount);
 
 /**
  * @brief #### Change the color to the next color

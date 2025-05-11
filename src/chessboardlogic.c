@@ -44,7 +44,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
     return mainBoard;
 }
 
-void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen){
+void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr){
     i8 skip_loading_screen_buffer = 0;
     FILE* ini_ptr = NULL;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
@@ -77,6 +77,21 @@ void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoor
                 }else{
                     *skip_loading_screen = true;
                 }
+            }else{
+                Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
+            }
+            if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
+                sscanf(ini_filecontent, "maxFps = %d", fpsMax_ptr);
+            }else{
+                Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
+            }
+            if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
+                sscanf(ini_filecontent, "screenWidth = %d", screenWidth_ptr);
+            }else{
+                Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
+            }
+            if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
+                sscanf(ini_filecontent, "screenHeight = %d", screenHeight_ptr);
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
@@ -124,11 +139,6 @@ void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord){
         free((*main_board_ptr)[freeIndex]);
     }
     free((*main_board_ptr));
-}
-
-void Board_Turn_Counter(u16* restrict turnCount){
-    printf("Turn %u\n", *turnCount);
-    *turnCount = (*turnCount) + 1;
 }
 
 void Board_Turn_NextColor(__color_t* restrict color_ptr){

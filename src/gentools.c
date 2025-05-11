@@ -9,12 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef OS_UNIX
-    #include <unistd.h>
-#elif defined OS_WINDOWS
-    #include <synchapi.h>
-#endif
-
 void Exception_SendWarning(const u8* restrict warningMsg){
     fprintf(stderr, "%s", warningMsg);
     #ifdef EXIT_ON_WARNING
