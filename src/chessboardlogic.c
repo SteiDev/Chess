@@ -41,35 +41,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
         }
     }
 
-    Sys_Clear();
-
     return mainBoard;
-}
-
-void Board_Print(playerPiece_t** inpboard, const u16 Xsize, const u16 Ysize){
-    u8 rowIndex = '1' + Ysize - 1;
-    u8 columnIndex;
-    
-    printf("  ");
-    for(columnIndex = 'a'; columnIndex < 'a' + Xsize; ++columnIndex){
-        printf("%c  ", columnIndex);
-    }
-    printf("\n");
-    for(u16 Yindex = Ysize - 1; Yindex != __UINT16_MAX__; --Yindex){ // underflow by design
-        printf("%c ", rowIndex);
-        for(u16 Xindex = 0; Xindex < Xsize; ++Xindex){
-            printf("%c", inpboard[Yindex][Xindex].pieceColor);
-            printf("%c ", inpboard[Yindex][Xindex].pieceType);
-        }
-        printf("%c", rowIndex);
-        --rowIndex;
-        printf("\n");
-    }
-    printf("  ");
-    for(columnIndex = 'a'; columnIndex < 'a' + Xsize; ++columnIndex){
-        printf("%c  ", columnIndex);
-    }
-    printf("\n");
 }
 
 void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen){
@@ -145,8 +117,6 @@ void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_
     }
 
     fclose(ini_ptr);
-
-    Sys_Clear();
 }
 
 void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord){
@@ -154,77 +124,6 @@ void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord){
         free((*main_board_ptr)[freeIndex]);
     }
     free((*main_board_ptr));
-}
-
-void Board_Turn_ReadAndValidate(playerPiece_t** restrict mainBoard, const __color_t currentColor, u16* fromCoordsX, u16* fromCoordsY, u16* toCoordsX, u16* toCoordsY, const u16 XBoardCoord, const u16 YBoardCoord){
-    u8 turnColor[__TURN_COLOR_MAX_SIZE__];
-    u8 aux_fromCoordsX = 0;
-    u8 aux_toCoordsX = 0;
-    i8 validPieceMove = 0;
-
-    switch(currentColor){
-        case white:
-            strcpy(turnColor, "White");
-            break;
-        case black:
-            strcpy(turnColor, "Black");
-            break;
-        default:
-            Exception_SendWarning("Warning: Invalid Color Turn (Board_Turn)\n");
-    }
-
-    printf("\n%s's Turn\n\n", turnColor);
-    
-    do{
-
-        do{
-            do{
-                printf("Enter the location of a piece: ");
-                scanf(" %c %hu", &aux_fromCoordsX, fromCoordsY);
-        
-                *fromCoordsX = toupper(aux_fromCoordsX);
-                *fromCoordsX = UPPERLETTER_TO_NUM(*fromCoordsX);
-                *fromCoordsX = (*fromCoordsX) - 1;  // ajust for chessboard indexing from 1
-                *fromCoordsY = (*fromCoordsY) - 1;
-        
-            }while(Exception_CheckBounds(*fromCoordsX, *fromCoordsY, XBoardCoord, YBoardCoord, false) != IN_BOUNDS);
-        }while(Piece_CheckOwner(mainBoard, *fromCoordsX, *fromCoordsY, currentColor) != VALID_OWNER);
-        
-        do{
-            printf("Enter the location to move the piece to: ");
-            scanf(" %c %hu", &aux_toCoordsX, toCoordsY);
-    
-            *toCoordsX = toupper(aux_toCoordsX);
-            *toCoordsX = UPPERLETTER_TO_NUM(*toCoordsX);
-            *toCoordsX = (*toCoordsX) - 1;
-            *toCoordsY = (*toCoordsY) - 1;
-    
-        }while(Exception_CheckBounds(*toCoordsX, *toCoordsY, XBoardCoord, YBoardCoord, false) != IN_BOUNDS);
-    
-        switch(mainBoard[*fromCoordsY][*fromCoordsX].pieceType){
-            case pawn:
-                validPieceMove = __CheckValidMove_Pawn__(mainBoard, *fromCoordsX, *fromCoordsY, *toCoordsX, *toCoordsY);
-                break;
-            case knight:
-                validPieceMove = __CheckValidMove_Knight__(*fromCoordsX, *fromCoordsY, *toCoordsX, *toCoordsY, XBoardCoord, YBoardCoord);
-                break;
-            case bishop:
-                validPieceMove = __CheckValidMove_Bishop__(mainBoard, *fromCoordsX, *fromCoordsY, *toCoordsX, *toCoordsY, XBoardCoord, YBoardCoord);
-                break;
-            case rook:
-                validPieceMove = __CheckValidMove_Rook__(mainBoard, *fromCoordsX, *fromCoordsY, *toCoordsX, *toCoordsY, XBoardCoord, YBoardCoord);
-                break;
-            case queen:
-                validPieceMove = __CheckValidMove_Queen__(mainBoard, *fromCoordsX, *fromCoordsY, *toCoordsX, *toCoordsY, XBoardCoord, YBoardCoord);
-                break;
-            case king:
-                validPieceMove = __CheckValidMove_King__(*fromCoordsX, *fromCoordsY, *toCoordsX, *toCoordsY);
-                break;
-            default:    
-                printf("Unimplemented (Board_Turn_Read)\n");
-                validPieceMove = INVALID_MOVE;
-        }
-    }while(validPieceMove != VALID_MOVE);
 }
 
 void Board_Turn_Counter(u16* restrict turnCount){
@@ -277,5 +176,92 @@ bool Board_Save_LoadGame(u8* restrict loadPrompt){
         return false;
     }else{
         return true;
+    }
+}
+
+bool Board_IsInsideBoard(const Vector2 mousePos, const u16 boardSizeX, const u16 boardSizeY) {
+    if((mousePos.x < 0 || mousePos.x >= boardSizeX) || (mousePos.y < 0 || mousePos.y >= boardSizeY)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY) {
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
+        Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
+        if(Board_IsInsideBoard(mousePos, boardSizeX, boardSizeY) != false) {
+            *fromX_ptr = (u16)mousePos.x;
+            *fromY_ptr = (u16)mousePos.y;
+            if(mainBoard[*fromY_ptr][*fromX_ptr].pieceColor == currentPlayerCol) {
+                    *highlightSelection = true;
+                    return true;
+                } else {
+                    *highlightSelection = false;
+                    return false;
+                }
+            } else {
+                *highlightSelection = false;
+                return false;
+            }
+    } else {
+        return false;
+    }
+}
+
+bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY) {
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
+        Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
+        i8 validPieceMove = INVALID_MOVE;
+        if(Board_IsInsideBoard(mousePos, boardSizeX, boardSizeY) != false) {
+            *toX_ptr = (u16)mousePos.x;
+            *toY_ptr = (u16)mousePos.y;
+
+            switch(mainBoard[fromY][fromX].pieceType){
+                case pawn:
+                    validPieceMove = __CheckValidMove_Pawn__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr);
+                    break;
+                case knight:
+                    validPieceMove = __CheckValidMove_Knight__(fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    break;
+                case bishop:
+                    validPieceMove = __CheckValidMove_Bishop__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    break;
+                case rook:
+                    validPieceMove = __CheckValidMove_Rook__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    break;
+                case queen:
+                    validPieceMove = __CheckValidMove_Queen__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    break;
+                case king:
+                    validPieceMove = __CheckValidMove_King__(fromX, fromY, *toX_ptr, *toY_ptr);
+                    break;
+                default:    
+                    printf("Unimplemented (Board_Turn_Read)\n");
+                    validPieceMove = INVALID_MOVE;
+            }
+            if(validPieceMove == VALID_MOVE) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+bool Board_UndoSelection(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY) {
+    if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) != false) {
+        Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
+        if(Board_IsInsideBoard(mousePos, boardSizeX, boardSizeY) != false) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
     }
 }

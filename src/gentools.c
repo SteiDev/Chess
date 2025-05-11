@@ -73,19 +73,3 @@ void Exception_CheckLoadedTexture(pieceTextures_t inptexture) {
         Exception_SendWarning("Warning: Failed to load pawn texture (Exception_CheckLoadedTexture)\n");
     }
 }
-
-void Sys_Clear(void){
-    #ifdef OS_UNIX
-        system(UNIX_CLEAR);
-    #elif defined OS_WINDOWS
-        system(WIN_CLEAR);
-    #endif
-}
-
-void Sys_Sleep(const u32 seconds){
-    #ifdef OS_UNIX
-    sleep(seconds);
-    #elif defined OS_WINDOWS
-    Sleep(seconds * 1000);
-    #endif
-}

@@ -6,9 +6,12 @@
 
 #include "raylib.h"
 
-static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 Xcoord, const u16 Ycoord, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces) {
-    i32 textureX = 0;
-    i32 textureY = 0;
+#include <stdio.h>
+#include <math.h>
+
+static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 Xcoord, const u16 Ycoord, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32 offsetX, const f32 offsetY) {
+    f32 textureX = 0;
+    f32 textureY = 0;
     Texture2D loadedTexture = {0};
     Color loadedColor = {0};
 
@@ -70,8 +73,8 @@ static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 X
         default:
         Exception_SendWarning("Warning: Invalid piece texture type (__Graphics_DrawPiece__)\n");
     }
-    textureX = Xcoord * SQUARE_SIZE + (SQUARE_SIZE - loadedTexture.width) / 2;
-    textureY = Ycoord * SQUARE_SIZE + (SQUARE_SIZE - loadedTexture.height) / 2;
+    textureX = (Xcoord + offsetX) * TILE_SIZE + (TILE_SIZE - loadedTexture.width) / 2;
+    textureY = (Ycoord + offsetY) * TILE_SIZE + (TILE_SIZE - loadedTexture.height) / 2;
 
     DrawTexture(loadedTexture, textureX, textureY, loadedColor);
 }
@@ -81,7 +84,7 @@ void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u1
     SetTargetFPS(targetFPS);
 }
 
-void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY) {
+void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY) {
     Color color = {0};
     Vector2 position = {0};
 
@@ -92,15 +95,15 @@ void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY) {
             } else {
                 color = LIGHTGRAY;
             }
-            position.x = col * SQUARE_SIZE;
-            position.y = row * SQUARE_SIZE;
-            DrawRectangleV(position, (Vector2){SQUARE_SIZE, SQUARE_SIZE}, color);
+            position.x = (col + offsetX) * TILE_SIZE;
+            position.y = (row + offsetY) * TILE_SIZE;
+            DrawRectangleV(position, (Vector2){TILE_SIZE, TILE_SIZE}, color);
         }
     }
 }
 
 void Graphics_LoadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* blackPieces_ptr) {
-    whitePieces_ptr->rook = LoadTexture(TEXTURE_WHITE_ROOK); // here is the crash
+    whitePieces_ptr->rook = LoadTexture(TEXTURE_WHITE_ROOK);
     whitePieces_ptr->knight = LoadTexture(TEXTURE_WHITE_KNIGHT);
     whitePieces_ptr->bishop = LoadTexture(TEXTURE_WHITE_BISHOP);
     whitePieces_ptr->queen = LoadTexture(TEXTURE_WHITE_QUEEN);
@@ -134,12 +137,37 @@ void Graphics_UnloadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* 
     UnloadTexture(blackPieces_ptr->pawn);    
 }
 
-void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces) {
+void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32 offsetX, const f32 offsetY) {
     for(u16 Yindex = 0; Yindex < boardSizeY; ++Yindex) {
         for(u16 Xindex = 0; Xindex < boardSizeX; ++Xindex) {
             if(mainBoard[Yindex][Xindex].pieceColor != color_NONE) {
-                __Graphics_DrawPiece__(mainBoard[Yindex][Xindex], Xindex, (boardSizeY - 1) - Yindex, whitePieces, blackPieces); // mirror the board
+                __Graphics_DrawPiece__(mainBoard[Yindex][Xindex], Xindex, (boardSizeY - 1) - Yindex, whitePieces, blackPieces, offsetX, offsetY); // mirror the board
             }
         }
     }
+}
+
+static Vector2 Graphics_ConvertToTile(Vector2 mousePos, const f32 offsetX, const f32 offsetY) {
+    mousePos.x = (mousePos.x - offsetX) / TILE_SIZE;
+    mousePos.y = (mousePos.y - offsetY) / TILE_SIZE;
+
+    mousePos.x = floorf(mousePos.x);
+    mousePos.y = floorf(mousePos.y);
+
+    return mousePos;
+}
+
+static Vector2 Graphics_FlipAxis (Vector2 mousePos, const u16 boardSizeY) {
+    mousePos.y = boardSizeY - 1 - mousePos.y; // -1 to ajust for the 0 array indexing in C
+
+    return mousePos;
+}
+
+Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f32 offsetX, const f32 offsetY) {
+    mousePos = Graphics_ConvertToTile(mousePos, offsetX, offsetY);
+    mousePos = Graphics_FlipAxis(mousePos, boardSizeY);
+
+    printf("%F\n%F\n", mousePos.x, mousePos.y);
+
+    return mousePos;
 }

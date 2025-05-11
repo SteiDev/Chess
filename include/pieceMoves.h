@@ -31,9 +31,9 @@ void Piece_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 
  * @param fromX The X coordinates (number of lines) of the piece.
  * @param fromY The Y coordinates (number of columns) of the piece.
  * @param currentTurnColor The color of the current player.
- * @return INVALID_OWNER if the colors don't match, VALID_OWNER otherwise.
+ * @return false if the colors don't match, true otherwise.
  */
-i8 Piece_CheckOwner(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor);
+bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor);
 
 /**
  * @brief #### Check if a pawn can move
