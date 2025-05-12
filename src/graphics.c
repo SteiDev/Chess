@@ -148,8 +148,8 @@ void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSize
 }
 
 static Vector2 Graphics_ConvertToTile(Vector2 mousePos, const f32 offsetX, const f32 offsetY) {
-    mousePos.x = (mousePos.x - offsetX) / TILE_SIZE;
-    mousePos.y = (mousePos.y - offsetY) / TILE_SIZE;
+    mousePos.x = (mousePos.x) / TILE_SIZE;
+    mousePos.y = (mousePos.y) / TILE_SIZE;
 
     mousePos.x = floorf(mousePos.x);
     mousePos.y = floorf(mousePos.y);
@@ -167,7 +167,10 @@ Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f
     mousePos = Graphics_ConvertToTile(mousePos, offsetX, offsetY);
     mousePos = Graphics_FlipAxis(mousePos, boardSizeY);
 
-    printf("%F\n%F\n", mousePos.x, mousePos.y);
+    mousePos.x -= floorf(offsetX);
+    mousePos.x += floorf(offsetY);
+
+    // printf("%F\n%F\n", mousePos.x, mousePos.y);
 
     return mousePos;
 }

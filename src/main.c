@@ -7,7 +7,6 @@
 #include "raylib.h"
 
 #include <stdio.h>
-#include <errno.h>
 
 #define DEBUG 1
 
@@ -49,6 +48,7 @@ i32 main() {
     
     Board_LoadPlacement(layoutName, &mainBoard, Xsize, Ysize);
     Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
     while(WindowShouldClose() == false) {
@@ -99,8 +99,4 @@ i32 main() {
     Graphics_UnloadTextures(&whiteTextures, &blackTextures);
     CloseWindow();
     Board_Free(&mainBoard, Ysize);
-
-    #ifdef DEBUG
-    perror("\nErrors");
-    #endif
 }
