@@ -59,10 +59,4 @@
     #define NULL ((void*)0)
 #endif
 
-// GCC specific attributes (currently unimplemented)
-#ifdef __GNUC__
-    // #define __attribute_const__ CONST_FUNC
-    // #define __attribute_pure__ PURE_FUNC
-#endif
-
 #endif // end of __TYPEDEFS_H__

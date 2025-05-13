@@ -11,9 +11,6 @@
 
 #define TURN_TEXT_LENGTH 10
 
-#define X_OFFSET 0
-#define Y_OFFSET 0
-
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 640
 #define TARGET_FPS 60
@@ -111,5 +108,6 @@ void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSize
 
 Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f32 offsetX, const f32 offsetY);
 void Graphics_PrintTurn(const u16 turnCounter);
+void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u16 boardSizeX, const u16 boardSizeY, f32* outputOffsetX, f32* outputOffsetY);
 
 #endif  // end of __GRAPHICS_H__

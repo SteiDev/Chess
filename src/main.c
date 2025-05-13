@@ -22,6 +22,8 @@ i32 main() {
     i32 screenWidth = 0;
     i32 screenHeight = 0;
     i32 fpsMax = 0;
+    f32 offsetX = 0;
+    f32 offsetY = 0;
     u8* layoutName = NULL;
     bool skip_loading_screen = false;    
     bool loadPreviousGame = false;
@@ -40,38 +42,39 @@ i32 main() {
     
     // needs to be improved
     loadPreviousGame = Board_Save_LoadGame("Load previous game? (y/n)");
-    if(loadPreviousGame != true){
+    if(loadPreviousGame != true) {
         layoutName = "config/layout.ini";
-    }else{
+    } else {
         layoutName = "saves/gamesave.ini";
     }
     
+    Graphics_CalculateOffset(screenWidth, screenHeight, Xsize, Ysize, &offsetX, &offsetY);
     Board_LoadPlacement(layoutName, &mainBoard, Xsize, Ysize);
     Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
     while(WindowShouldClose() == false) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Graphics_DrawBoard(Xsize, Ysize, X_OFFSET, Y_OFFSET);
+        Graphics_DrawBoard(Xsize, Ysize, offsetX, offsetY);
         
-        Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, X_OFFSET, Y_OFFSET);
+        Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, offsetX, offsetY);
         Graphics_PrintTurn(turnCounter);
 
+        // To highlight the current selected piece
         if(highlightSelection != false) {
-            DrawRectangle((fromXCoords + X_OFFSET) * TILE_SIZE, (Ysize - fromYCoords - 1 + Y_OFFSET) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
+            DrawRectangle(offsetX + fromXCoords * TILE_SIZE, offsetY + (Ysize - fromYCoords - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
         }
         switch(gameState) {
             case checkFrom:
-                validFrom = Board_GetFrom(mainBoard, Xsize, Ysize, &fromXCoords, &fromYCoords, currentCol, &highlightSelection, X_OFFSET, Y_OFFSET);
+                validFrom = Board_GetFrom(mainBoard, Xsize, Ysize, &fromXCoords, &fromYCoords, currentCol, &highlightSelection, offsetX, offsetY);
                 if(validFrom != false) {
                     gameState = checkTo;
                 }
                 break;
             case checkTo:
-                undoSelection = Board_UndoSelection(Xsize, Ysize, X_OFFSET, Y_OFFSET);
-                validTo = Board_GetTo(mainBoard, Xsize, Ysize, fromXCoords, fromYCoords, &toXCoords, &toYCoords, X_OFFSET, Y_OFFSET);
+                undoSelection = Board_UndoSelection(Xsize, Ysize, offsetX, offsetY);
+                validTo = Board_GetTo(mainBoard, Xsize, Ysize, fromXCoords, fromYCoords, &toXCoords, &toYCoords, offsetX, offsetY);
 
                 if(undoSelection != false) {
                     gameState = checkFrom;
