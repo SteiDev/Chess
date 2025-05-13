@@ -170,19 +170,42 @@ Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f
     return mousePos;
 }
 
-// The text location still needs to be ajusted
-void Graphics_PrintTurn(const u16 turnCounter) {
-    u8 turnText[TURN_TEXT_LENGTH];
+void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offsetY, const __color_t currentColor) {
+    u8* colorText = NULL;
+    u8 finalText[TURN_TEXT_MAX_LENGTH];
+    i32 textPosX = 0;
+    i32 textPosY = 0;
+    Color playerColor = WHITE;
+
+    switch(currentColor) {
+        case white:
+            colorText = "White";
+            playerColor = GRAY;
+            break;
+        case black:
+            colorText = "Black";
+            playerColor = BLACK;
+            break;
+        default:
+            Exception_SendWarning("Warning: Invalid current player color (Graphics_PrintTurn)\n");
+            colorText = "color_NONE";
+            playerColor = RED;
+    }
+
+    snprintf(finalText, sizeof(finalText), "Turn %hu (%s's turn)", turnCounter, colorText);
+
+    textPosX = offsetX + 4;
+    textPosY = offsetY - TILE_SIZE / 2;
     
-    sprintf(turnText, "Turn: %hu", turnCounter);
-    
-    DrawText(turnText, 300, 10, 25, DARKGRAY);
+    DrawText(finalText, textPosX, textPosY, 25, playerColor);
 }
 
-void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u16 boardSizeX, const u16 boardSizeY, f32* outputOffsetX, f32* outputOffsetY) {
-    const i32 boardPixelWidth = TILE_SIZE * boardSizeX;
-    const i32 boardPixelHeight = TILE_SIZE * boardSizeY;
+void Graphics_CalculateBoardPixels(const u16 boardSizeX, const u16 boardSizeY, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight) {
+    *outputBoardPixelWidth = TILE_SIZE * boardSizeX;
+    *outputBoardPixelHeight = TILE_SIZE * boardSizeY;
+}
 
+void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight, f32* outputOffsetX, f32* outputOffsetY) {
     *outputOffsetX = (screenWidth - boardPixelWidth) / 2;   
     *outputOffsetY = (screenHeight - boardPixelHeight) / 2;
 }

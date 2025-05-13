@@ -9,7 +9,7 @@
 /** * @brief #### Size of a chessboard square */
 #define TILE_SIZE 60
 
-#define TURN_TEXT_LENGTH 10
+#define TURN_TEXT_MAX_LENGTH 50
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 640
@@ -107,7 +107,8 @@ void Graphics_UnloadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* 
 void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32 offsetX, const f32 offsetY);
 
 Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f32 offsetX, const f32 offsetY);
-void Graphics_PrintTurn(const u16 turnCounter);
-void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u16 boardSizeX, const u16 boardSizeY, f32* outputOffsetX, f32* outputOffsetY);
+void Graphics_CalculateBoardPixels(const u16 boardSizeX, const u16 boardSizeY, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight);
+void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offsetY, const __color_t currentColor);
+void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight, f32* outputOffsetX, f32* outputOffsetY);
 
 #endif  // end of __GRAPHICS_H__

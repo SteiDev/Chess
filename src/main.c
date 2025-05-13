@@ -19,6 +19,8 @@ i32 main() {
     u16 toXCoords = 0;
     u16 toYCoords = 0;
     u16 turnCounter = 1;  // starts at turn 1
+    u32 boardPixelWidth = 0;
+    u32 boardPixelHeight = 0;
     i32 screenWidth = 0;
     i32 screenHeight = 0;
     i32 fpsMax = 0;
@@ -48,7 +50,8 @@ i32 main() {
         layoutName = "saves/gamesave.ini";
     }
     
-    Graphics_CalculateOffset(screenWidth, screenHeight, Xsize, Ysize, &offsetX, &offsetY);
+    Graphics_CalculateBoardPixels(Xsize, Ysize, &boardPixelHeight, &boardPixelWidth);
+    Graphics_CalculateOffset(screenWidth, screenHeight, boardPixelWidth, boardPixelHeight,   &offsetX, &offsetY);
     Board_LoadPlacement(layoutName, &mainBoard, Xsize, Ysize);
     Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
@@ -59,7 +62,7 @@ i32 main() {
         Graphics_DrawBoard(Xsize, Ysize, offsetX, offsetY);
         
         Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, offsetX, offsetY);
-        Graphics_PrintTurn(turnCounter);
+        Graphics_PrintTurn(turnCounter, offsetX, offsetY, currentCol);
 
         // To highlight the current selected piece
         if(highlightSelection != false) {
