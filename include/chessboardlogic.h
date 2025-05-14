@@ -10,6 +10,11 @@
 
 // [Piece related structs]
 
+typedef struct u16Vector2 {
+    u16 x;
+    u16 y;
+} u16Vector2;
+
 /**
  * @brief #### Chess pieces
  * @brief Contains all types of pieces.
