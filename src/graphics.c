@@ -211,31 +211,37 @@ void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, con
 }
 
 void Graphics_PrintScale(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY) {
-    // letters are on bottom and start from a, increasing as the go to the right
-    // numbers are on left and start from 1, increasing as the go to the right
-    i32 numbersPosX = offsetX - 17;
-    i32 numbersPosY = offsetY + boardPixelHeight - 43;
-    i32 lettersPosX = offsetX + 24;
-    i32 lettersPosY = offsetY + boardPixelHeight;
-    u16 numberIndex = 1;
-    u8 letterIndex = 'a';
     u8 numberText[NUMBERS_TEXT_MAX_LENGTH] = {0};
-    u8 lettersText[LETTERS_TEXT_MAX_LENGTH] = {0};
+    u8 letterText[LETTERS_TEXT_MAX_LENGTH] = {0};
+    u8 letterVal = 'a';
+    u16 numberVal = 1;
+    i32 textWidthNumber = 0;
+    i32 textWidthLetter = 0;
+    i32 posYNumber = 0;
+    i32 posXLetter = 0;
 
-    for(u16 numIndexLoop = 0; numIndexLoop < boardSizeY; ++numIndexLoop) {
-        snprintf(numberText, sizeof(numberText), "%hu", numberIndex);
-        DrawText(numberText, numbersPosX, numbersPosY, 25 , DARKGRAY);
-        DrawText(numberText, numbersPosX + boardPixelWidth + 25, numbersPosY, 25 , DARKGRAY);
-        numbersPosY -= TILE_SIZE;
-        ++numberIndex;
+    for (u16 currentY = 0; currentY < boardSizeY; ++currentY) {
+        snprintf(numberText, sizeof(numberText), "%hu", numberVal);
+
+        textWidthNumber = MeasureText(numberText, USUAL_FONT_SIZE);
+
+        posYNumber = offsetY + ((boardSizeY - 1 - currentY) * TILE_SIZE) + TILE_SIZE / 2 - USUAL_FONT_SIZE / 2;
+
+        DrawText(numberText, offsetX - textWidthNumber - 5, posYNumber, USUAL_FONT_SIZE, DARKGRAY);
+        DrawText(numberText, offsetX + boardPixelWidth + 5, posYNumber, USUAL_FONT_SIZE, DARKGRAY);
+
+        ++numberVal;
     }
 
-    for(u16 letterIndexLoop = 0; letterIndexLoop < boardSizeX; ++letterIndexLoop) {
-        snprintf(lettersText, sizeof(lettersText), "%c", letterIndex);
-        DrawText(lettersText, lettersPosX, lettersPosY, 25 , DARKGRAY);
-        DrawText(lettersText, lettersPosX, lettersPosY - boardPixelHeight - 27, 25 , DARKGRAY);
-        lettersPosX += TILE_SIZE;
-        ++letterIndex;
-    }
+    for (u16 x = 0; x < boardSizeX; ++x) {
+        snprintf(letterText, sizeof(letterText), "%c", letterVal);
 
+        textWidthLetter = MeasureText(letterText, USUAL_FONT_SIZE);
+        posXLetter = offsetX + (x * TILE_SIZE) + TILE_SIZE / 2 - textWidthLetter / 2;
+
+        DrawText(letterText, posXLetter, offsetY + boardPixelHeight + 5, USUAL_FONT_SIZE, DARKGRAY);
+        DrawText(letterText, posXLetter, offsetY - USUAL_FONT_SIZE - 5, USUAL_FONT_SIZE, DARKGRAY);
+        
+        ++letterVal;
+    }
 }

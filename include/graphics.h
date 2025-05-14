@@ -8,9 +8,10 @@
 
 /** * @brief #### Size of a chessboard square */
 #define TILE_SIZE 60
+#define USUAL_FONT_SIZE 25
 
 #define TURN_TEXT_MAX_LENGTH 50
-#define NUMBERS_TEXT_MAX_LENGTH 5
+#define NUMBERS_TEXT_MAX_LENGTH 6
 #define LETTERS_TEXT_MAX_LENGTH 3
 
 #define WINDOW_WIDTH 640
