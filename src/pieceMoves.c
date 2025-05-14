@@ -15,8 +15,6 @@
 #define __LOST_COLOR_MAX_SIZE__ 25
 #define __LOST_PIECE_MAX_SIZE__ 25
 
-#define SLEEP_SECONDS_AFTER_CAPTURE 1
-
 i8 __CheckTile__(playerPiece_t** restrict board, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
     if(board[fromY][fromX].pieceColor == board[toY][toX].pieceColor){
         return __CANNOT_MOVE__;
@@ -103,7 +101,7 @@ bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, con
     }
 }
 
-i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
+DEPRECATED i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
     switch(mainBoard[fromY][fromX].pieceColor){
         case white:
             if((fromX == toX) && (toY == fromY + 1) && (mainBoard[toY][toX].pieceColor == color_NONE)){

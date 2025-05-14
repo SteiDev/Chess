@@ -44,7 +44,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
     return mainBoard;
 }
 
-void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr){
+void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr){
     i8 skip_loading_screen_buffer = 0;
     FILE* ini_ptr = NULL;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
@@ -92,6 +92,11 @@ void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoor
             }
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
                 sscanf(ini_filecontent, "screenHeight = %d", screenHeight_ptr);
+            }else{
+                Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
+            }
+            if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
+                sscanf(ini_filecontent, "showCoordinates = %hhu", (u8*)showCoordinates_ptr);
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
