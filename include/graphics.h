@@ -10,6 +10,8 @@
 #define TILE_SIZE 60
 
 #define TURN_TEXT_MAX_LENGTH 50
+#define NUMBERS_TEXT_MAX_LENGTH 5
+#define LETTERS_TEXT_MAX_LENGTH 3
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 640
@@ -110,5 +112,6 @@ Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f
 void Graphics_CalculateBoardPixels(const u16 boardSizeX, const u16 boardSizeY, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight);
 void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offsetY, const __color_t currentColor);
 void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight, f32* outputOffsetX, f32* outputOffsetY);
+void Graphics_PrintScale(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY);
 
 #endif  // end of __GRAPHICS_H__

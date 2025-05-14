@@ -63,6 +63,7 @@ i32 main() {
         
         Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, offsetX, offsetY);
         Graphics_PrintTurn(turnCounter, offsetX, offsetY, currentCol);
+        Graphics_PrintScale(Xsize, Ysize, boardPixelWidth, boardPixelHeight, offsetX, offsetY);
 
         // To highlight the current selected piece
         if(highlightSelection != false) {

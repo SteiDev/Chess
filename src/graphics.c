@@ -172,7 +172,7 @@ Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f
 
 void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offsetY, const __color_t currentColor) {
     u8* colorText = NULL;
-    u8 finalText[TURN_TEXT_MAX_LENGTH];
+    u8 finalText[TURN_TEXT_MAX_LENGTH] = {0};
     i32 textPosX = 0;
     i32 textPosY = 0;
     Color playerColor = WHITE;
@@ -195,7 +195,7 @@ void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offs
     snprintf(finalText, sizeof(finalText), "Turn %hu (%s's turn)", turnCounter, colorText);
 
     textPosX = offsetX + 4;
-    textPosY = offsetY - TILE_SIZE / 2;
+    textPosY = offsetY - TILE_SIZE;
     
     DrawText(finalText, textPosX, textPosY, 25, playerColor);
 }
@@ -208,4 +208,34 @@ void Graphics_CalculateBoardPixels(const u16 boardSizeX, const u16 boardSizeY, u
 void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight, f32* outputOffsetX, f32* outputOffsetY) {
     *outputOffsetX = (screenWidth - boardPixelWidth) / 2;   
     *outputOffsetY = (screenHeight - boardPixelHeight) / 2;
+}
+
+void Graphics_PrintScale(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY) {
+    // letters are on bottom and start from a, increasing as the go to the right
+    // numbers are on left and start from 1, increasing as the go to the right
+    i32 numbersPosX = offsetX - 17;
+    i32 numbersPosY = offsetY + boardPixelHeight - 43;
+    i32 lettersPosX = offsetX + 24;
+    i32 lettersPosY = offsetY + boardPixelHeight;
+    u16 numberIndex = 1;
+    u8 letterIndex = 'a';
+    u8 numberText[NUMBERS_TEXT_MAX_LENGTH] = {0};
+    u8 lettersText[LETTERS_TEXT_MAX_LENGTH] = {0};
+
+    for(u16 numIndexLoop = 0; numIndexLoop < boardSizeY; ++numIndexLoop) {
+        snprintf(numberText, sizeof(numberText), "%hu", numberIndex);
+        DrawText(numberText, numbersPosX, numbersPosY, 25 , DARKGRAY);
+        DrawText(numberText, numbersPosX + boardPixelWidth + 25, numbersPosY, 25 , DARKGRAY);
+        numbersPosY -= TILE_SIZE;
+        ++numberIndex;
+    }
+
+    for(u16 letterIndexLoop = 0; letterIndexLoop < boardSizeX; ++letterIndexLoop) {
+        snprintf(lettersText, sizeof(lettersText), "%c", letterIndex);
+        DrawText(lettersText, lettersPosX, lettersPosY, 25 , DARKGRAY);
+        DrawText(lettersText, lettersPosX, lettersPosY - boardPixelHeight - 27, 25 , DARKGRAY);
+        lettersPosX += TILE_SIZE;
+        ++letterIndex;
+    }
+
 }
