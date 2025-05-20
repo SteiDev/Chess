@@ -15,22 +15,22 @@
 #define __LOST_COLOR_MAX_SIZE__ 25
 #define __LOST_PIECE_MAX_SIZE__ 25
 
-i8 __CheckTile__(playerPiece_t** restrict board, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
-    if(board[fromY][fromX].pieceColor == board[toY][toX].pieceColor){
+i8 __CheckTile__(playerPiece_t** restrict board, const u16Vect2 from, const u16Vect2 to) {
+    if(board[from.y][from.x].pieceColor == board[to.y][to.x].pieceColor){
         return __CANNOT_MOVE__;
-    }else if(board[toY][toX].pieceColor == color_NONE){
+    }else if(board[to.y][to.x].pieceColor == color_NONE){
         return __CAN_MOVE__;
     }else{
         return __CAN_MOVE_AND_CAPTURE__;
     }
 }
 
-void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const bool capturePiece){
+void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, const bool capturePiece) {
     u8 lostColor[__LOST_COLOR_MAX_SIZE__];
     u8 lostPiece[__LOST_PIECE_MAX_SIZE__];
 
     if(capturePiece == true){
-        switch((*board_ptr)[toY][toX].pieceColor){
+        switch((*board_ptr)[to.y][to.x].pieceColor){
             case white:
                 strcpy(lostColor, "White");
                 break;
@@ -40,7 +40,7 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u
             default:
                 Exception_SendWarning("Warning: Invalid lost color (__MovePiece__)\n");
         }
-        switch((*board_ptr)[toY][toX].pieceType){
+        switch((*board_ptr)[to.y][to.x].pieceType){
             case pawn:
                 strcpy(lostPiece, "Pawn");
                 break;
@@ -66,56 +66,56 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u
         printf("%s lost a %s!\n", lostColor, lostPiece);
     }
 
-    (*board_ptr)[toY][toX].pieceType = (*board_ptr)[fromY][fromX].pieceType;
-    (*board_ptr)[toY][toX].pieceColor = (*board_ptr)[fromY][fromX].pieceColor;
+    (*board_ptr)[to.y][to.x].pieceType = (*board_ptr)[from.y][from.x].pieceType;
+    (*board_ptr)[to.y][to.x].pieceColor = (*board_ptr)[from.y][from.x].pieceColor;
 
-    (*board_ptr)[fromY][fromX].pieceType = piece_NONE;
-    (*board_ptr)[fromY][fromX].pieceColor = color_NONE;
+    (*board_ptr)[from.y][from.x].pieceType = piece_NONE;
+    (*board_ptr)[from.y][from.x].pieceColor = color_NONE;
 }
 
-void __Piece_CheckAndMove__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
+void __Piece_CheckAndMove__(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to) {
     bool capturePiece = false;
 
-    if(__CheckTile__((*board_ptr), fromX, fromY, toX, toY) == __CANNOT_MOVE__){
+    if(__CheckTile__((*board_ptr), from, to) == __CANNOT_MOVE__){
         printf("Invalid Move: try again!\n");
     }else{
-        if(__CheckTile__((*board_ptr), fromX, fromY, toX, toY) == __CAN_MOVE_AND_CAPTURE__){
+        if(__CheckTile__((*board_ptr), from, to) == __CAN_MOVE_AND_CAPTURE__){
             capturePiece = true;
         }else{
             capturePiece = false;
         }
-        __MovePiece__(board_ptr, fromX, fromY, toX, toY, capturePiece);
+        __MovePiece__(board_ptr, from, to, capturePiece);
     }
 
 }
 
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
-    __Piece_CheckAndMove__(board_ptr, fromX, fromY, toX, toY);   
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to) {
+    __Piece_CheckAndMove__(board_ptr, from, to);   
 }
 
-bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor){
-    if(mainBoard[fromY][fromX].pieceColor == currentTurnColor){
+bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16Vect2 from, const __color_t currentTurnColor) {
+    if(mainBoard[from.y][from.x].pieceColor == currentTurnColor){
         return true;
     }else{
         return false;
     }
 }
 
-i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
-    switch(mainBoard[fromY][fromX].pieceColor){
+i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to) {
+    switch(mainBoard[from.y][from.x].pieceColor){
         case white:
-            if((fromX == toX) && (toY == fromY + 1) && (mainBoard[toY][toX].pieceColor == color_NONE)){
+            if((from.x == to.x) && (to.y == from.y + 1) && (mainBoard[to.y][to.x].pieceColor == color_NONE)){
                 return VALID_MOVE;
-            }else if(((fromX -1 == toX) || (fromX +1 == toX)) && (toY == fromY + 1) && (mainBoard[toY][toX].pieceColor == black)){
+            }else if(((from.x -1 == to.x) || (from.x +1 == to.x)) && (to.y == from.y + 1) && (mainBoard[to.y][to.x].pieceColor == black)){
                 return VALID_MOVE;
             }else{
                 return INVALID_MOVE;
             }
             break;
         case black:
-            if((fromX == toX) && (toY == fromY - 1) && (mainBoard[toY][toX].pieceColor == color_NONE)){
+            if((from.x == to.x) && (to.y == from.y - 1) && (mainBoard[to.y][to.x].pieceColor == color_NONE)){
                 return VALID_MOVE;
-            }else if(((fromX -1 == toX) || (fromX +1 == toX)) && (toY == fromY - 1) && (mainBoard[toY][toX].pieceColor == white)){
+            }else if(((from.x -1 == to.x) || (from.x +1 == to.x)) && (to.y == from.y - 1) && (mainBoard[to.y][to.x].pieceColor == white)){
                 return VALID_MOVE;
             }else{
                 return INVALID_MOVE;
@@ -127,28 +127,28 @@ i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, 
     return INVALID_MOVE;
 }
 
-i8 __CheckValidMove_Knight__(const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY){
-    if(fromX > toX){
-        if(fromY > toY){
+i8 __CheckValidMove_Knight__(const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize) {
+    if(from.x > to.x){
+        if(from.y > to.y){
             // - -
-            if((Exception_CheckBounds(fromX - 1, fromY - 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX - 2, fromY - 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(from.x - 1, from.y - 2, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(from.x - 2, from.y - 1, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }else{
             // - +
-            if((Exception_CheckBounds(fromX - 1, fromY + 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX - 2, fromY + 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(from.x - 1, from.y + 2, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(from.x - 2, from.y + 1, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }
-    }else if(fromX < toX){
-        if(fromY > toY){
+    }else if(from.x < to.x){
+        if(from.y > to.y){
             // + -
-            if((Exception_CheckBounds(fromX + 1, fromY - 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX + 2, fromY - 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(from.x + 1, from.y - 2, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(from.x + 2, from.y - 1, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }else{
             // + +
-            if((Exception_CheckBounds(fromX + 1, fromY + 2, boardX, boardY, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(fromX + 2, fromY + 1, boardX, boardY, true) != OUT_OF_BOUNDS)){
+            if((Exception_CheckBounds(from.x + 1, from.y + 2, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS) || (Exception_CheckBounds(from.x + 2, from.y + 1, boardSize.x, boardSize.y, true) != OUT_OF_BOUNDS)){
                 return VALID_MOVE;
             }
         }
@@ -157,39 +157,39 @@ i8 __CheckValidMove_Knight__(const u16 fromX, const u16 fromY, const u16 toX, co
 }
 
 // redo at some point
-i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY) {
+i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize) {
     i32 stepX = 0;
     i32 stepY = 0;
     u16 boardIndexX = 0;
     u16 boardIndexY = 0;
 
     // Check if the move is diagonal (i.e., the absolute differences in X and Y are equal)
-    if (abs(fromX - toX) != abs(fromY - toY)) {
+    if (abs(from.x - to.x) != abs(from.y - to.y)) {
         return INVALID_MOVE; // Bishops must move diagonally
     }
 
-    // Ensure the destination (toX, toY) is within the bounds of the board
-    if (toX >= boardX || toY >= boardY) {
+    // Ensure the destination (to.x, to.y) is within the bounds of the board
+    if (to.x >= boardSize.x || to.y >= boardSize.y) {
         return INVALID_MOVE; // Destination is out of bounds
     }
 
     // Determine the direction and check for obstacles in the diagonal path
-    if(toX > fromX){
+    if(to.x > from.x){
         stepX = 1;
     }else{
         stepX = -1;
     }
 
-    if(toY > fromY){
+    if(to.y > from.y){
         stepY = 1;
     }else{
         stepY = -1;
     }
 
-    boardIndexX = fromX + stepX;
-    boardIndexY = fromY + stepY;
+    boardIndexX = from.x + stepX;
+    boardIndexY = from.y + stepY;
 
-    while (boardIndexX != toX && boardIndexY != toY) {
+    while (boardIndexX != to.x && boardIndexY != to.y) {
         if (mainBoard[boardIndexY][boardIndexX].pieceColor != color_NONE) {
             return INVALID_MOVE; // Obstacle found in the path
         }
@@ -198,7 +198,7 @@ i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16 fromX
     }
 
     // Final destination square check
-    if (mainBoard[toY][toX].pieceColor == color_NONE || mainBoard[toY][toX].pieceColor != mainBoard[fromY][fromX].pieceColor) {
+    if (mainBoard[to.y][to.x].pieceColor == color_NONE || mainBoard[to.y][to.x].pieceColor != mainBoard[from.y][from.x].pieceColor) {
         return VALID_MOVE; // Valid move: target is either empty or occupied by opponent
     }
 
@@ -206,51 +206,51 @@ i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16 fromX
 }
 
 // redo at some point
-i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY){
+i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize) {
     i32 stepX = 0;
     i32 stepY = 0;
     u16 boardIndexX = 0;
     u16 boardIndexY = 0;
 
     // Rook must move either horizontally or vertically
-    if (fromX != toX && fromY != toY) {
+    if (from.x != to.x && from.y != to.y) {
         return INVALID_MOVE; // Rook moves in straight lines (horizontally or vertically)
     }
 
-    // Ensure the destination (toX, toY) is within the bounds of the board
-    if (toX >= boardX || toY >= boardY) {
+    // Ensure the destination (to.x, to.y) is within the bounds of the board
+    if (to.x >= boardSize.x || to.y >= boardSize.y) {
         return INVALID_MOVE; // Destination is out of bounds
     }
 
     // If moving horizontally (same row)
-    if (fromY == toY) {
-        // Check horizontal path from fromX to toX
-        if(toX > fromX){
+    if (from.y == to.y) {
+        // Check horizontal path from from.x to to.x
+        if(to.x > from.x){
             stepX = 1;
         }else{
             stepX = -1;
         }
-        boardIndexX = fromX + stepX;
+        boardIndexX = from.x + stepX;
 
-        while (boardIndexX != toX) {
-            if (mainBoard[fromY][boardIndexX].pieceColor != color_NONE) {
+        while (boardIndexX != to.x) {
+            if (mainBoard[from.y][boardIndexX].pieceColor != color_NONE) {
                 return INVALID_MOVE; // Obstacle found in the path
             }
             boardIndexX += stepX;
         }
     }
     // If moving vertically (same column)
-    else if (fromX == toX) {
-        // Check vertical path from fromY to toY
-        if(toY > fromY){
+    else if (from.x == to.x) {
+        // Check vertical path from from.y to to.y
+        if(to.y > from.y){
             stepY = 1;
         }else{
             stepY = -1;
         }
-        boardIndexY = fromY + stepY;
+        boardIndexY = from.y + stepY;
 
-        while (boardIndexY != toY) {
-            if (mainBoard[boardIndexY][fromX].pieceColor != color_NONE) {
+        while (boardIndexY != to.y) {
+            if (mainBoard[boardIndexY][from.x].pieceColor != color_NONE) {
                 return INVALID_MOVE; // Obstacle found in the path
             }
             boardIndexY += stepY;
@@ -258,24 +258,24 @@ i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16 fromX, 
     }
 
     // Final destination square check
-    if (mainBoard[toY][toX].pieceColor == color_NONE || mainBoard[toY][toX].pieceColor != mainBoard[fromY][fromX].pieceColor) {
+    if (mainBoard[to.y][to.x].pieceColor == color_NONE || mainBoard[to.y][to.x].pieceColor != mainBoard[from.y][from.x].pieceColor) {
         return VALID_MOVE; // Valid move: target is either empty or occupied by opponent
     }
 
     return INVALID_MOVE; // Invalid move: target is occupied by a piece of the same color
 }
 
-i8 __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY){
-    if((__CheckValidMove_Bishop__(mainBoard, fromX, fromY, toX, toY, boardX, boardY) == VALID_MOVE) || (__CheckValidMove_Rook__(mainBoard, fromX, fromY, toX, toY, boardX, boardY) == VALID_MOVE)){
+i8 __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize) {
+    if((__CheckValidMove_Bishop__(mainBoard, from, to, boardSize) == VALID_MOVE) || (__CheckValidMove_Rook__(mainBoard, from, to, boardSize) == VALID_MOVE)){
         return VALID_MOVE;    
     }else{
         return INVALID_MOVE;
     }
 }
 
-i8 __CheckValidMove_King__(const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
-    if((toX == fromX + 1) || (toX == fromX - 1)){
-        if((toY == fromY + 1) || (toY == fromY - 1)){
+i8 __CheckValidMove_King__(const u16Vect2 from, const u16Vect2 to) {
+    if((to.x == from.x + 1) || (to.x == from.x - 1)){
+        if((to.y == from.y + 1) || (to.y == from.y - 1)){
             return VALID_MOVE;
         }    
     }

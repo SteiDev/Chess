@@ -1,6 +1,8 @@
 #ifndef __TYPEDEFS_H__
 #define __TYPEDEFS_H__
 
+#include "raylib.h"
+
 #ifndef i8
     typedef signed char i8;
 #endif
@@ -60,6 +62,7 @@
 #endif
 
 // GCC attributes
+
 #ifdef __GNUC__
     #ifndef DEPRECATED
         #define DEPRECATED __attribute__((deprecated))
@@ -71,8 +74,19 @@
 #endif
 
 // to fix specific errors/warnings
+
 #ifndef u8_EXPLICIT
     typedef unsigned char u8_EXPLICIT;
 #endif
+
+// useful struct for reducing the code size
+
+typedef struct u16Vect2 {
+    u16 x;
+    u16 y;
+} u16Vect2;
+
+// raylib struct
+typedef Vector2 f32Vect2;
 
 #endif // end of __TYPEDEFS_H__

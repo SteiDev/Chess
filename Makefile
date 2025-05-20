@@ -34,3 +34,7 @@ clear:
 debug:
 	@@echo Starting GDB...
 	@gdb bin/chessboard
+
+rebuild:
+	@make clear --no-print-directory
+	@make all --no-print-directory

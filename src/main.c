@@ -12,20 +12,16 @@
 
 i32 main() {
     playerPiece_t** mainBoard = NULL;
-    u16 Xsize = 0;
-    u16 Ysize = 0;
-    u16 fromXCoords = 0;
-    u16 fromYCoords = 0;
-    u16 toXCoords = 0;
-    u16 toYCoords = 0;
     u16 turnCounter = 1;  // starts at turn 1
     u32 boardPixelWidth = 0;
     u32 boardPixelHeight = 0;
     i32 screenWidth = 0;
     i32 screenHeight = 0;
     i32 fpsMax = 0;
-    f32 offsetX = 0;
-    f32 offsetY = 0;
+    u16Vect2 boardSize = {0};
+    u16Vect2 from = {0};
+    u16Vect2 to = {0};
+    f32Vect2 offset = {0};
     u8* layoutName = NULL;
     bool loadPreviousGame = false;
     bool validFrom = false;
@@ -38,51 +34,51 @@ i32 main() {
     pieceTextures_t blackTextures = {0};
     gameState_t gameState = checkFrom;
     boardTheme_t boardTheme = THEME_CLASSIC;
+
+    Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &screenWidth, &screenHeight, &showCoordinates);
     
-    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &fpsMax, &screenWidth, &screenHeight, &showCoordinates);
-    
-    mainBoard = Board_Init(Xsize, Ysize);
+    mainBoard = Board_Init(boardSize);
     
     // needs to be improved
     loadPreviousGame = Board_Save_LoadGame("Load previous game? (y/n)");
-    if(loadPreviousGame != true) {
+    if(loadPreviousGame == false) {
         layoutName = "config/layout.ini";
     } else {
         layoutName = "saves/gamesave.ini";
     }
     
-    Graphics_CalculateBoardPixels(Xsize, Ysize, &boardPixelHeight, &boardPixelWidth);
-    Graphics_CalculateOffset(screenWidth, screenHeight, boardPixelWidth, boardPixelHeight,   &offsetX, &offsetY);
-    Board_LoadPlacement(layoutName, &mainBoard, Xsize, Ysize);
+    Graphics_CalculateBoardPixels(boardSize, &boardPixelHeight, &boardPixelWidth);
+    offset = Graphics_CalculateOffset(screenWidth, screenHeight, boardPixelWidth, boardPixelHeight);
+    Board_LoadPlacement(layoutName, &mainBoard, boardSize);
     Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
     while(WindowShouldClose() == false) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Graphics_DrawBoard(Xsize, Ysize, offsetX, offsetY, boardTheme);
+        Graphics_DrawBoard(boardSize, offset, boardTheme);
         
-        Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, offsetX, offsetY);
-        Graphics_PrintTurn(turnCounter, offsetX, offsetY, currentCol);
+        Graphics_DrawPieces(mainBoard, boardSize, whiteTextures, blackTextures, offset);
+        Graphics_PrintTurn(turnCounter, offset, currentCol);
 
         if(showCoordinates != false) {
-            Graphics_PrintCoordinates(Xsize, Ysize, boardPixelWidth, boardPixelHeight, offsetX, offsetY);
+            Graphics_PrintCoordinates(boardSize, boardPixelWidth, boardPixelHeight, offset);
         }
 
         // To highlight the current selected piece
         if(highlightSelection != false) {
-            DrawRectangle(offsetX + fromXCoords * TILE_SIZE, offsetY + (Ysize - fromYCoords - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
+            DrawRectangle(offset.x + from.x * TILE_SIZE, offset.y + (boardSize.y - from.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
         }
         switch(gameState) {
             case checkFrom:
-                validFrom = Board_GetFrom(mainBoard, Xsize, Ysize, &fromXCoords, &fromYCoords, currentCol, &highlightSelection, offsetX, offsetY);
+                validFrom = Board_GetFrom(mainBoard, boardSize, &from, currentCol, &highlightSelection, offset);
                 if(validFrom != false) {
                     gameState = checkTo;
                 }
                 break;
             case checkTo:
-                undoSelection = Board_UndoSelection(Xsize, Ysize, offsetX, offsetY);
-                validTo = Board_GetTo(mainBoard, Xsize, Ysize, fromXCoords, fromYCoords, &toXCoords, &toYCoords, offsetX, offsetY);
+                undoSelection = Board_UndoSelection(boardSize, offset);
+                validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset);
 
                 if(undoSelection != false) {
                     gameState = checkFrom;
@@ -93,10 +89,10 @@ i32 main() {
                 }
                 break;
             case move:
-                Piece_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
+                Piece_Move(&mainBoard, from, to);
                 Board_Turn_NextColor(&currentCol);
                 ++turnCounter;
-                Board_Save_SaveGame(mainBoard, Xsize, Ysize, "saves/gamesave.ini");
+                Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
                 gameState = checkFrom;
                 highlightSelection = false;
                 break;
@@ -109,5 +105,5 @@ i32 main() {
     
     Graphics_UnloadTextures(&whiteTextures, &blackTextures);
     CloseWindow();
-    Board_Free(&mainBoard, Ysize);
+    Board_Free(&mainBoard, boardSize.y);
 }

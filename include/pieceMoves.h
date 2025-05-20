@@ -23,7 +23,7 @@
  * @param toX The X coordinates (number of lines) of the location where the piece should be moved.
  * @param toY The Y coordinates (number of columns) of the location where the piece should be moved.
  */
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY);
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to);
 
 /**
  * @brief #### Check the color of the piece
@@ -33,7 +33,7 @@ void Piece_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 
  * @param currentTurnColor The color of the current player.
  * @return false if the colors don't match, true otherwise.
  */
-bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor);
+bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16Vect2 from, const __color_t currentTurnColor);
 
 /**
  * @brief #### Check if a pawn can move
@@ -46,7 +46,7 @@ bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, con
  * @param toY The Y coordinates (number of columns) of the location where the pawn should be moved.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY);
+i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to);
 
 /**
  * @brief #### Check if a knight can move
@@ -59,7 +59,7 @@ i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, 
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Knight__(const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY);
+i8 __CheckValidMove_Knight__(const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a bishop can move
@@ -73,7 +73,7 @@ i8 __CheckValidMove_Knight__(const u16 fromX, const u16 fromY, const u16 toX, co
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY);
+i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a rook can move
@@ -87,7 +87,7 @@ i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16 fromX
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY);
+i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a queen can move
@@ -101,7 +101,7 @@ i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16 fromX, 
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY, const u16 boardX, const u16 boardY);
+i8 __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a king can move
@@ -112,6 +112,6 @@ i8 __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16 fromX,
  * @param toY The Y coordinates (number of columns) of the location where the knight should be moved.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_King__(const u16 fromX, const u16 fromY, const u16 toX, const u16 toY);
+i8 __CheckValidMove_King__(const u16Vect2 from, const u16Vect2 to);
 
 #endif // __PIECEMOVES_H__

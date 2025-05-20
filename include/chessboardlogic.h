@@ -10,11 +10,6 @@
 
 // [Piece related structs]
 
-typedef struct u16Vector2 {
-    u16 x;
-    u16 y;
-} u16Vector2;
-
 /**
  * @brief #### Chess pieces
  * @brief Contains all types of pieces.
@@ -74,7 +69,7 @@ typedef enum gameState_t {
  * @param boardSizeY The Y coordinates (number of columns) of the board.
  * @return The initialised board.
  */
-playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY);
+playerPiece_t** Board_Init(const u16Vect2 boardSize);
 
 /**
  * @brief #### Load general settings from an ini file
@@ -85,7 +80,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY);
  * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
  * @param skip_loading_screen Skip or not the loading screens.
  */
-NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr);
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr);
 
 /**
  * @brief #### Loads the placement of the board from an ini file
@@ -95,7 +90,7 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XB
  * @param XBoardCoord The X coordinates (number of lines) of the board.
  * @param YBoardCoord The Y coordinates (number of columns) of the board.
  */
-NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord);
+NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord);
 
 /**
  * @brief #### Free the allocated heap memory of the main board
@@ -125,12 +120,12 @@ NONNULL void Board_Turn_NextColor(__color_t* restrict color_ptr);
  * @param YBoardCoord The Y coordinates (number of columns) of the board.
  * @param filename Name of the file containing the game save.
  */
-NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename);
+NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u8* restrict filename);
 
 NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt);
-bool Board_IsInsideBoard(const Vector2 mousePos, const u16 boardSizeX, const u16 boardSizeY);
-NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY);
-NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY);
-bool Board_UndoSelection(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY);
+bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize);
+NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16Vect2* restrict from_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32Vect2 offset);
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset);
+bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset);
 
 #endif // __CHESSBOARDLOGIC_H__
