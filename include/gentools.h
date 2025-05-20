@@ -67,20 +67,4 @@ i8 Exception_CheckBounds(const u16 currentX, const u16 currentY, const u16 maxX,
  */
 void Exception_CheckLoadedTexture(pieceTextures_t inptexture);
 
-// [Platform independent system functions]
-
-/**
- * @brief #### Clear
- * @brief Clears the terminal.
- */
-void Sys_Clear(void);
-
-/**
- * @brief #### Sleep
- * @brief Puts the system on wait for the specified number of seconds.
- * @param seconds The number of seconds for the system to stay in sleep.
- */
-void Sys_Sleep(const u32 seconds);
-
-
 #endif  // end of __GENTOOLS_H__

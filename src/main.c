@@ -7,16 +7,10 @@
 #include "raylib.h"
 
 #include <stdio.h>
-#include <errno.h>
 
 #define DEBUG 1
 
-#define SLEEP_SECONDS 1
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 640
-#define TARGET_FPS 60
-
-i32 main(){
+i32 main() {
     playerPiece_t** mainBoard = NULL;
     u16 Xsize = 0;
     u16 Ysize = 0;
@@ -25,54 +19,86 @@ i32 main(){
     u16 toXCoords = 0;
     u16 toYCoords = 0;
     u16 turnCounter = 1;  // starts at turn 1
+    u32 boardPixelWidth = 0;
+    u32 boardPixelHeight = 0;
+    i32 screenWidth = 0;
+    i32 screenHeight = 0;
+    i32 fpsMax = 0;
+    f32 offsetX = 0;
+    f32 offsetY = 0;
     u8* layoutName = NULL;
     bool skip_loading_screen = false;    
     bool loadPreviousGame = false;
-    bool clicked = false;
+    bool validFrom = false;
+    bool validTo = false;
+    bool highlightSelection = false;
+    bool undoSelection = false;
     __color_t currentCol = white;  // white starts first
-    Vector2 mousePos;
     pieceTextures_t whiteTextures = {0};
     pieceTextures_t blackTextures = {0};
+    gameState_t gameState = checkFrom;
     
-    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen);
+    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen, &fpsMax, &screenWidth, &screenHeight);
     
     mainBoard = Board_Init(Xsize, Ysize);
     
     // needs to be improved
     loadPreviousGame = Board_Save_LoadGame("Load previous game? (y/n)");
-    if(loadPreviousGame != true){
+    if(loadPreviousGame != true) {
         layoutName = "config/layout.ini";
-    }else{
+    } else {
         layoutName = "saves/gamesave.ini";
     }
     
+    Graphics_CalculateBoardPixels(Xsize, Ysize, &boardPixelHeight, &boardPixelWidth);
+    Graphics_CalculateOffset(screenWidth, screenHeight, boardPixelWidth, boardPixelHeight,   &offsetX, &offsetY);
     Board_LoadPlacement(layoutName, &mainBoard, Xsize, Ysize);
-    
-    Graphics_InitRaylib(WINDOW_WIDTH, WINDOW_HEIGHT, TARGET_FPS);
-    Graphics_LoadTextures(&whiteTextures, &blackTextures); // crashes here
+    Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
+    Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
-    while(WindowShouldClose() == false){
-        mousePos = GetMousePosition();
-        clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
-        
+    while(WindowShouldClose() == false) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Graphics_DrawBoard(Xsize, Ysize);
+        Graphics_DrawBoard(Xsize, Ysize, offsetX, offsetY);
+        
+        Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, offsetX, offsetY);
+        Graphics_PrintTurn(turnCounter, offsetX, offsetY, currentCol);
+        Graphics_PrintScale(Xsize, Ysize, boardPixelWidth, boardPixelHeight, offsetX, offsetY);
 
-        // Board_Print(mainBoard, Xsize, Ysize);
-        // printf("\n");
+        // To highlight the current selected piece
+        if(highlightSelection != false) {
+            DrawRectangle(offsetX + fromXCoords * TILE_SIZE, offsetY + (Ysize - fromYCoords - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
+        }
+        switch(gameState) {
+            case checkFrom:
+                validFrom = Board_GetFrom(mainBoard, Xsize, Ysize, &fromXCoords, &fromYCoords, currentCol, &highlightSelection, offsetX, offsetY);
+                if(validFrom != false) {
+                    gameState = checkTo;
+                }
+                break;
+            case checkTo:
+                undoSelection = Board_UndoSelection(Xsize, Ysize, offsetX, offsetY);
+                validTo = Board_GetTo(mainBoard, Xsize, Ysize, fromXCoords, fromYCoords, &toXCoords, &toYCoords, offsetX, offsetY);
 
-        Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures);
-
-        // Board_Turn_Counter(&turnCounter);
-        // Board_Turn_ReadAndValidate(mainBoard, currentCol, &fromXCoords, &fromYCoords, &toXCoords, &toYCoords, Xsize, Ysize);
-        // Piece_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
-        // Board_Turn_NextColor(&currentCol);
-        Sys_Sleep(SLEEP_SECONDS);
-        // Sys_Clear();
-
-        // this might change later
-        Board_Save_SaveGame(mainBoard, Xsize, Ysize, "saves/gamesave.ini");
+                if(undoSelection != false) {
+                    gameState = checkFrom;
+                    highlightSelection = false;
+                }
+                if(validTo != false) {
+                    gameState = move;
+                }
+                break;
+            case move:
+                Piece_Move(&mainBoard, fromXCoords, fromYCoords, toXCoords, toYCoords);
+                Board_Turn_NextColor(&currentCol);
+                ++turnCounter;
+                Board_Save_SaveGame(mainBoard, Xsize, Ysize, "saves/gamesave.ini");
+                gameState = checkFrom;
+                highlightSelection = false;
+                break;
+            default:
+            Exception_SendWarning("Warning: Invalid game state (main)\n");
+        }
 
         EndDrawing();
     }
@@ -80,8 +106,4 @@ i32 main(){
     Graphics_UnloadTextures(&whiteTextures, &blackTextures);
     CloseWindow();
     Board_Free(&mainBoard, Ysize);
-
-    #ifdef DEBUG
-    perror("\nErrors");
-    #endif
 }

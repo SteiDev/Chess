@@ -9,8 +9,7 @@
 
 ## Frontend
 ### Urgent:
-- Add moves using GUI
 ### Important:
-- Make the rest of the GUI
+- Add letters and numbers next to the board
 ### Unimportant:
 - Add green tiles for possible moves and red tiles for possible kills

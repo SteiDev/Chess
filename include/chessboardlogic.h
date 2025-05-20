@@ -3,13 +3,9 @@
 
 #include "../include/typedefs.h"
 
+#include "raylib.h"
 
 // [Piece related macros]
-
-// Converts an upper board letter to its corresponding number 
-#define UPPERLETTER_TO_NUM(letter)  ((letter) - '@')
-// A = 65
-// @ = 64
 
 
 // [Piece related structs]
@@ -55,6 +51,12 @@ typedef struct playerPiece_t{
     __color_t pieceColor;
 }playerPiece_t;
 
+typedef enum gameState_t {
+    checkFrom,
+    checkTo,
+    move
+} gameState_t;
+
 // [Board related functions]
 
 // General board functions
@@ -69,9 +71,6 @@ typedef struct playerPiece_t{
  */
 playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY);
 
-// Prints the current board and the letter-number coordinates; WARNING: if the table coordinates are too large, the coordinates will show up incorrectly
-void Board_Print(playerPiece_t** restrict inpboard, const u16 Xsize, const u16 Ysize);
-
 /**
  * @brief #### Load general settings from an ini file
  * @brief Loads general game settings from an ini file. Should always be used before initialising the board.
@@ -81,7 +80,7 @@ void Board_Print(playerPiece_t** restrict inpboard, const u16 Xsize, const u16 Y
  * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
  * @param skip_loading_screen Skip or not the loading screens.
  */
-void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen);
+void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr);
 
 /**
  * @brief #### Loads the placement of the board from an ini file
@@ -104,12 +103,6 @@ void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord);
 
 // Turn related functions
 
-// Reads the move positions (from and to) and checks if they are valid, if they are not the function will ask the user again for the positions until they are valid
-void Board_Turn_ReadAndValidate(playerPiece_t** restrict mainBoard, const __color_t currentColor, u16* fromCoordsX, u16* fromCoordsY, u16* toCoordsX, u16* toCoordsY, const u16 XBoardCoord, const u16 YBoardCoord);
-
-// Prints the current turn and then increments the turn count by 1
-void Board_Turn_Counter(u16* restrict turnCount);
-
 /**
  * @brief #### Change the color to the next color
  * @brief Change the color to the next color, according to the order of players.
@@ -130,5 +123,9 @@ void Board_Turn_NextColor(__color_t* restrict color_ptr);
 void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename);
 
 bool Board_Save_LoadGame(u8* restrict loadPrompt);
+bool Board_IsInsideBoard(const Vector2 mousePos, const u16 boardSizeX, const u16 boardSizeY);
+bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY);
+bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY);
+bool Board_UndoSelection(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY);
 
 #endif // __CHESSBOARDLOGIC_H__

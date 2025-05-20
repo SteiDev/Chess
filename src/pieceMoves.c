@@ -66,7 +66,6 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16 fromX, const u
         }
 
         printf("%s lost a %s!\n", lostColor, lostPiece);
-        Sys_Sleep(SLEEP_SECONDS_AFTER_CAPTURE);
     }
 
     (*board_ptr)[toY][toX].pieceType = (*board_ptr)[fromY][fromX].pieceType;
@@ -96,12 +95,11 @@ void Piece_Move(playerPiece_t*** restrict board_ptr, const u16 fromX, const u16 
     __Piece_CheckAndMove__(board_ptr, fromX, fromY, toX, toY);   
 }
 
-i8 Piece_CheckOwner(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor){
-    if(mainBoard[fromY][fromX].pieceColor != currentTurnColor){
-        printf("Invalid Piece Selected: select a piece of your own color!\n");
-        return INVALID_OWNER;
+bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const __color_t currentTurnColor){
+    if(mainBoard[fromY][fromX].pieceColor == currentTurnColor){
+        return true;
     }else{
-        return VALID_OWNER;
+        return false;
     }
 }
 

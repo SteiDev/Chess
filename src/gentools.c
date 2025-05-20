@@ -9,12 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef OS_UNIX
-    #include <unistd.h>
-#elif defined OS_WINDOWS
-    #include <synchapi.h>
-#endif
-
 void Exception_SendWarning(const u8* restrict warningMsg){
     fprintf(stderr, "%s", warningMsg);
     #ifdef EXIT_ON_WARNING
@@ -72,20 +66,4 @@ void Exception_CheckLoadedTexture(pieceTextures_t inptexture) {
         TraceLog(LOG_WARNING, "Failed to load pawn texture!");
         Exception_SendWarning("Warning: Failed to load pawn texture (Exception_CheckLoadedTexture)\n");
     }
-}
-
-void Sys_Clear(void){
-    #ifdef OS_UNIX
-        system(UNIX_CLEAR);
-    #elif defined OS_WINDOWS
-        system(WIN_CLEAR);
-    #endif
-}
-
-void Sys_Sleep(const u32 seconds){
-    #ifdef OS_UNIX
-    sleep(seconds);
-    #elif defined OS_WINDOWS
-    Sleep(seconds * 1000);
-    #endif
 }

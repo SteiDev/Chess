@@ -6,9 +6,12 @@
 
 #include "raylib.h"
 
-static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 Xcoord, const u16 Ycoord, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces) {
-    i32 textureX = 0;
-    i32 textureY = 0;
+#include <stdio.h>
+#include <math.h>
+
+static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 Xcoord, const u16 Ycoord, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32 offsetX, const f32 offsetY) {
+    f32 textureX = 0;
+    f32 textureY = 0;
     Texture2D loadedTexture = {0};
     Color loadedColor = {0};
 
@@ -70,8 +73,8 @@ static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 X
         default:
         Exception_SendWarning("Warning: Invalid piece texture type (__Graphics_DrawPiece__)\n");
     }
-    textureX = Xcoord * SQUARE_SIZE + (SQUARE_SIZE - loadedTexture.width) / 2;
-    textureY = Ycoord * SQUARE_SIZE + (SQUARE_SIZE - loadedTexture.height) / 2;
+    textureX = offsetX + Xcoord * TILE_SIZE + (TILE_SIZE - loadedTexture.width) / 2;
+    textureY = offsetY + Ycoord * TILE_SIZE + (TILE_SIZE - loadedTexture.height) / 2;
 
     DrawTexture(loadedTexture, textureX, textureY, loadedColor);
 }
@@ -81,7 +84,7 @@ void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u1
     SetTargetFPS(targetFPS);
 }
 
-void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY) {
+void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY) {
     Color color = {0};
     Vector2 position = {0};
 
@@ -92,15 +95,15 @@ void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY) {
             } else {
                 color = LIGHTGRAY;
             }
-            position.x = col * SQUARE_SIZE;
-            position.y = row * SQUARE_SIZE;
-            DrawRectangleV(position, (Vector2){SQUARE_SIZE, SQUARE_SIZE}, color);
+            position.x = offsetX + col * TILE_SIZE;
+            position.y = offsetY + row * TILE_SIZE;
+            DrawRectangleV(position, (Vector2){TILE_SIZE, TILE_SIZE}, color);
         }
     }
 }
 
 void Graphics_LoadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* blackPieces_ptr) {
-    whitePieces_ptr->rook = LoadTexture(TEXTURE_WHITE_ROOK); // here is the crash
+    whitePieces_ptr->rook = LoadTexture(TEXTURE_WHITE_ROOK);
     whitePieces_ptr->knight = LoadTexture(TEXTURE_WHITE_KNIGHT);
     whitePieces_ptr->bishop = LoadTexture(TEXTURE_WHITE_BISHOP);
     whitePieces_ptr->queen = LoadTexture(TEXTURE_WHITE_QUEEN);
@@ -134,12 +137,111 @@ void Graphics_UnloadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* 
     UnloadTexture(blackPieces_ptr->pawn);    
 }
 
-void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces) {
+void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32 offsetX, const f32 offsetY) {
     for(u16 Yindex = 0; Yindex < boardSizeY; ++Yindex) {
         for(u16 Xindex = 0; Xindex < boardSizeX; ++Xindex) {
             if(mainBoard[Yindex][Xindex].pieceColor != color_NONE) {
-                __Graphics_DrawPiece__(mainBoard[Yindex][Xindex], Xindex, (boardSizeY - 1) - Yindex, whitePieces, blackPieces); // mirror the board
+                __Graphics_DrawPiece__(mainBoard[Yindex][Xindex], Xindex, (boardSizeY - 1) - Yindex, whitePieces, blackPieces, offsetX, offsetY); // mirror the board
             }
         }
+    }
+}
+
+static Vector2 Graphics_ConvertToTile(Vector2 mousePos, const f32 offsetX, const f32 offsetY) {
+    mousePos.x = (mousePos.x - offsetX) / TILE_SIZE;
+    mousePos.y = (mousePos.y - offsetY) / TILE_SIZE;
+
+    mousePos.x = floorf(mousePos.x);
+    mousePos.y = floorf(mousePos.y);
+
+    return mousePos;
+}
+
+static Vector2 Graphics_FlipAxis (Vector2 mousePos, const u16 boardSizeY) {
+    mousePos.y = boardSizeY - 1 - mousePos.y; // -1 to ajust for the 0 array indexing in C
+
+    return mousePos;
+}
+
+Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f32 offsetX, const f32 offsetY) {
+    mousePos = Graphics_ConvertToTile(mousePos, offsetX, offsetY);
+    mousePos = Graphics_FlipAxis(mousePos, boardSizeY);
+
+    return mousePos;
+}
+
+void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offsetY, const __color_t currentColor) {
+    u8* colorText = NULL;
+    u8 finalText[TURN_TEXT_MAX_LENGTH] = {0};
+    i32 textPosX = 0;
+    i32 textPosY = 0;
+    Color playerColor = WHITE;
+
+    switch(currentColor) {
+        case white:
+            colorText = "White";
+            playerColor = GRAY;
+            break;
+        case black:
+            colorText = "Black";
+            playerColor = BLACK;
+            break;
+        default:
+            Exception_SendWarning("Warning: Invalid current player color (Graphics_PrintTurn)\n");
+            colorText = "color_NONE";
+            playerColor = RED;
+    }
+
+    snprintf(finalText, sizeof(finalText), "Turn %hu (%s's turn)", turnCounter, colorText);
+
+    textPosX = offsetX + 4;
+    textPosY = offsetY - TILE_SIZE;
+    
+    DrawText(finalText, textPosX, textPosY, 25, playerColor);
+}
+
+void Graphics_CalculateBoardPixels(const u16 boardSizeX, const u16 boardSizeY, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight) {
+    *outputBoardPixelWidth = TILE_SIZE * boardSizeX;
+    *outputBoardPixelHeight = TILE_SIZE * boardSizeY;
+}
+
+void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight, f32* outputOffsetX, f32* outputOffsetY) {
+    *outputOffsetX = (screenWidth - boardPixelWidth) / 2;   
+    *outputOffsetY = (screenHeight - boardPixelHeight) / 2;
+}
+
+void Graphics_PrintScale(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY) {
+    u8 numberText[NUMBERS_TEXT_MAX_LENGTH] = {0};
+    u8 letterText[LETTERS_TEXT_MAX_LENGTH] = {0};
+    u8 letterVal = 'a';
+    u16 numberVal = 1;
+    i32 textWidthNumber = 0;
+    i32 textWidthLetter = 0;
+    i32 posYNumber = 0;
+    i32 posXLetter = 0;
+
+    for (u16 currentY = 0; currentY < boardSizeY; ++currentY) {
+        snprintf(numberText, sizeof(numberText), "%hu", numberVal);
+
+        textWidthNumber = MeasureText(numberText, USUAL_FONT_SIZE);
+
+        posYNumber = offsetY + ((boardSizeY - 1 - currentY) * TILE_SIZE) + TILE_SIZE / 2 - USUAL_FONT_SIZE / 2;
+
+        DrawText(numberText, offsetX - textWidthNumber - 5, posYNumber, USUAL_FONT_SIZE, DARKGRAY);
+        DrawText(numberText, offsetX + boardPixelWidth + 5, posYNumber, USUAL_FONT_SIZE, DARKGRAY);
+
+        ++numberVal;
+    }
+
+    for (u16 x = 0; x < boardSizeX; ++x) {
+        snprintf(letterText, sizeof(letterText), "%c", letterVal);
+
+        textWidthLetter = MeasureText(letterText, USUAL_FONT_SIZE);
+        posXLetter = offsetX + (x * TILE_SIZE) + TILE_SIZE / 2 - textWidthLetter / 2;
+
+        DrawText(letterText, posXLetter, offsetY + boardPixelHeight + 5, USUAL_FONT_SIZE, DARKGRAY);
+        DrawText(letterText, posXLetter, offsetY - USUAL_FONT_SIZE - 5, USUAL_FONT_SIZE, DARKGRAY);
+        
+        ++letterVal;
     }
 }
