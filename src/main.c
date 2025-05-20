@@ -27,7 +27,6 @@ i32 main() {
     f32 offsetX = 0;
     f32 offsetY = 0;
     u8* layoutName = NULL;
-    bool skip_loading_screen = false;    
     bool loadPreviousGame = false;
     bool validFrom = false;
     bool validTo = false;
@@ -40,7 +39,7 @@ i32 main() {
     gameState_t gameState = checkFrom;
     boardTheme_t boardTheme = THEME_CLASSIC;
     
-    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen, &fpsMax, &screenWidth, &screenHeight, &showCoordinates);
+    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &fpsMax, &screenWidth, &screenHeight, &showCoordinates);
     
     mainBoard = Board_Init(Xsize, Ysize);
     

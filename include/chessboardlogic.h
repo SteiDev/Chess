@@ -85,7 +85,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY);
  * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
  * @param skip_loading_screen Skip or not the loading screens.
  */
-void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr);
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr);
 
 /**
  * @brief #### Loads the placement of the board from an ini file
@@ -95,7 +95,7 @@ void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoor
  * @param XBoardCoord The X coordinates (number of lines) of the board.
  * @param YBoardCoord The Y coordinates (number of columns) of the board.
  */
-void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord);
+NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord);
 
 /**
  * @brief #### Free the allocated heap memory of the main board
@@ -104,7 +104,7 @@ void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_
  * @param main_board_ptr Pointer to the main board.
  * @param YBoardCoord The Y coordinates (number of columns) of the board.
  */
-void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord);
+NONNULL void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord);
 
 // Turn related functions
 
@@ -114,7 +114,7 @@ void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord);
  * @note This function can throw exceptions
  * @param color_ptr Pointer to the color of the current player.
  */
-void Board_Turn_NextColor(__color_t* restrict color_ptr);
+NONNULL void Board_Turn_NextColor(__color_t* restrict color_ptr);
 
 /**
  * @brief #### Save the current state of the game
@@ -125,12 +125,12 @@ void Board_Turn_NextColor(__color_t* restrict color_ptr);
  * @param YBoardCoord The Y coordinates (number of columns) of the board.
  * @param filename Name of the file containing the game save.
  */
-void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename);
+NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename);
 
-bool Board_Save_LoadGame(u8* restrict loadPrompt);
+NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt);
 bool Board_IsInsideBoard(const Vector2 mousePos, const u16 boardSizeX, const u16 boardSizeY);
-bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY);
-bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY);
+NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY);
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY);
 bool Board_UndoSelection(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY);
 
 #endif // __CHESSBOARDLOGIC_H__

@@ -64,6 +64,15 @@
     #ifndef DEPRECATED
         #define DEPRECATED __attribute__((deprecated))
     #endif
+
+    #ifndef NONNULL 
+        #define NONNULL __attribute__((nonnull))
+    #endif
+#endif
+
+// to fix specific errors/warnings
+#ifndef u8_EXPLICIT
+    typedef unsigned char u8_EXPLICIT;
 #endif
 
 #endif // end of __TYPEDEFS_H__

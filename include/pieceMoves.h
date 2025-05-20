@@ -46,7 +46,7 @@ bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, con
  * @param toY The Y coordinates (number of columns) of the location where the pawn should be moved.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-DEPRECATED i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY);
+i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY);
 
 /**
  * @brief #### Check if a knight can move

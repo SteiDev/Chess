@@ -101,7 +101,7 @@ bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16 fromX, con
     }
 }
 
-DEPRECATED i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
+i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16 fromX, const u16 fromY, const u16 toX, const u16 toY){
     switch(mainBoard[fromY][fromX].pieceColor){
         case white:
             if((fromX == toX) && (toY == fromY + 1) && (mainBoard[toY][toX].pieceColor == color_NONE)){

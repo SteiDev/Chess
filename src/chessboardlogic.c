@@ -44,17 +44,9 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
     return mainBoard;
 }
 
-void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr){
-    i8 skip_loading_screen_buffer = 0;
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr){
     FILE* ini_ptr = NULL;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
-
-    if((ini_filename == NULL) || (XBoardCoord == NULL) || (YBoardCoord == NULL) || (skip_loading_screen == NULL)){
-        #ifdef EXIT_ON_FATAL_ERROR
-        fprintf(stderr, "Error: Invalid Board_Settings_General arguments\n");
-        exit(EXIT_FAILURE);
-        #endif
-    }
     
     ini_ptr = fopen(ini_filename, "r");
     Exception_CheckNULLPtr((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Settings_General)\n");
@@ -67,16 +59,6 @@ void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoor
         }else{
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
                 sscanf(ini_filecontent, "table_size = %hux%hu", XBoardCoord, YBoardCoord);
-            }else{
-                Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
-            }
-            if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "show_loading_screen = %hhd", &skip_loading_screen_buffer);  // still no bool format specifier in 2025
-                if(skip_loading_screen_buffer == 0){
-                    *skip_loading_screen = false;
-                }else{
-                    *skip_loading_screen = true;
-                }
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
@@ -96,7 +78,7 @@ void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoor
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "showCoordinates = %hhu", (u8*)showCoordinates_ptr);
+                sscanf(ini_filecontent, "showCoordinates = %hhu", (u8_EXPLICIT*)showCoordinates_ptr);  // had to use the special type to get rid of the warning 
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
@@ -108,16 +90,12 @@ void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoor
     fclose(ini_ptr);
 }
 
-void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord){
+NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord){
     FILE* ini_ptr = NULL;
     playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE};
     u16 XBoard_Placement_Buffer = 0;
     u16 YBoard_Placement_Buffer = 0;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
-
-    printf(LOADING_MESSAGE_PIECES_EN);
-
-    Exception_CheckNULLPtr((u8*)ini_filename, "Type Error: Invalid ini filename (Board_Placement)\n");
     
     ini_ptr = fopen(ini_filename, "r");
     Exception_CheckNULLPtr((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Placement)\n");
@@ -139,14 +117,14 @@ void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_
     fclose(ini_ptr);
 }
 
-void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord){
+NONNULL void Board_Free(playerPiece_t*** main_board_ptr, const u16 YBoardCoord){
     for(u16 freeIndex = 0; freeIndex < YBoardCoord; ++freeIndex){
         free((*main_board_ptr)[freeIndex]);
     }
     free((*main_board_ptr));
 }
 
-void Board_Turn_NextColor(__color_t* restrict color_ptr){
+NONNULL void Board_Turn_NextColor(__color_t* restrict color_ptr){
     switch(*color_ptr){
         case white:
             *color_ptr = black;
@@ -159,7 +137,7 @@ void Board_Turn_NextColor(__color_t* restrict color_ptr){
     }
 }
 
-void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename){
+NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename){
     FILE* saveFile_ptr = NULL;
 
     saveFile_ptr = fopen(filename, "w");
@@ -179,7 +157,7 @@ void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoo
 }
 
 // quick and dirty implementation that probably needs to be fixed later
-bool Board_Save_LoadGame(u8* restrict loadPrompt){
+NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt){
     u8 keyboardLetter = 0;
 
     printf("%s\n", loadPrompt);
@@ -202,7 +180,7 @@ bool Board_IsInsideBoard(const Vector2 mousePos, const u16 boardSizeX, const u16
     }
 }
 
-bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY) {
+NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
         Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
         if(Board_IsInsideBoard(mousePos, boardSizeX, boardSizeY) != false) {
@@ -224,7 +202,7 @@ bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, con
     }
 }
 
-bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY) {
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
         Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
         i8 validPieceMove = INVALID_MOVE;
