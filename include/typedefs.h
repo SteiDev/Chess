@@ -59,4 +59,11 @@
     #define NULL ((void*)0)
 #endif
 
+// GCC attributes
+#ifdef __GNUC__
+    #ifndef DEPRECATED
+        #define DEPRECATED __attribute__((deprecated))
+    #endif
+#endif
+
 #endif // end of __TYPEDEFS_H__

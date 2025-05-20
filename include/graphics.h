@@ -10,13 +10,36 @@
 #define TILE_SIZE 60
 #define USUAL_FONT_SIZE 25
 
-#define TURN_TEXT_MAX_LENGTH 50
-#define NUMBERS_TEXT_MAX_LENGTH 6
-#define LETTERS_TEXT_MAX_LENGTH 3
-
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 640
 #define TARGET_FPS 60
+
+#define COLOR_LIGHT_WOOD (Color){ 222, 184, 135, 255 }
+#define COLOR_DARK_WOOD (Color){ 101, 67, 33, 255 }
+#define COLOR_RADIOACTIVE_YELLOW (Color){ 137, 137, 17, 255 }
+#define COLOR_RADIOACTIVE_BLACK (Color){ 26, 26, 2, 255 }
+#define COLOR_LIGHTER_BLACK (Color){ 32, 32, 32, 255 }
+#define COLOR_DARKER_WHITE (Color){ 192, 192, 192, 255 }
+#define COLOR_BEACH_WATER (Color){ 35, 137, 218, 255 }
+#define COLOR_BEACH_SAND (Color){ 234, 190, 117, 255 }
+#define COLOR_ASH_BLACK (Color){ 22, 22, 22, 255 }
+#define COLOR_DARK_RED (Color){ 187, 0, 14, 255 }
+#define COLOR_PRISMARINE_BLUE (Color){ 27, 67, 50, 255}
+#define COLOR_PRISMARINE_LIGHTBLUE (Color){ 116, 198, 157, 255}
+
+/** * @brief #### Default board theme colors */
+#define THEME_DEFAULT (boardTheme_t){LIGHTGRAY, DARKGRAY}
+#define THEME_CLASSIC (boardTheme_t){COLOR_LIGHT_WOOD, COLOR_DARK_WOOD}
+#define THEME_RADIOACTIVE (boardTheme_t){COLOR_RADIOACTIVE_YELLOW, COLOR_RADIOACTIVE_BLACK}
+#define THEME_BW (boardTheme_t){COLOR_DARKER_WHITE, COLOR_LIGHTER_BLACK}
+#define THEME_BEACH (boardTheme_t){COLOR_BEACH_SAND, COLOR_BEACH_WATER}
+#define THEME_SPOOKY (boardTheme_t){COLOR_DARK_RED, COLOR_ASH_BLACK}
+#define THEME_AQUATIC (boardTheme_t){COLOR_PRISMARINE_LIGHTBLUE, COLOR_PRISMARINE_BLUE}
+
+typedef struct boardTheme_t {
+    Color evenTile;
+    Color oddTile;
+} boardTheme_t;
 
 /** * @brief #### Path the to white rook png file */
 #define TEXTURE_WHITE_ROOK "textures/pieces_png/white_rook.png"
@@ -78,7 +101,7 @@ void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u1
  * @param boardSizeX The X coordinates (number of lines) of the board.
  * @param boardSizeY The Y coordinates (number of columns) of the board.
  */
-void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY);
+void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY, const boardTheme_t theme);
 
 /**
  * @brief #### Load chesspieces textures
@@ -113,6 +136,6 @@ Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f
 void Graphics_CalculateBoardPixels(const u16 boardSizeX, const u16 boardSizeY, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight);
 void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offsetY, const __color_t currentColor);
 void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight, f32* outputOffsetX, f32* outputOffsetY);
-void Graphics_PrintScale(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY);
+void Graphics_PrintCoordinates(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY);
 
 #endif  // end of __GRAPHICS_H__

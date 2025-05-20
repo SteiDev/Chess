@@ -9,6 +9,10 @@
 #include <stdio.h>
 #include <math.h>
 
+#define TURN_TEXT_MAX_LENGTH 50
+#define NUMBERS_TEXT_MAX_LENGTH 6
+#define LETTERS_TEXT_MAX_LENGTH 3
+
 static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 Xcoord, const u16 Ycoord, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32 offsetX, const f32 offsetY) {
     f32 textureX = 0;
     f32 textureY = 0;
@@ -84,16 +88,16 @@ void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u1
     SetTargetFPS(targetFPS);
 }
 
-void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY) {
+void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY, const boardTheme_t theme) {
     Color color = {0};
     Vector2 position = {0};
 
     for (u16 row = 0; row < boardSizeY; ++row) {
         for (u16 col = 0; col < boardSizeX; ++col) {
             if((row + col) % 2 == 0){
-                color = DARKGRAY;
+                color = theme.evenTile;
             } else {
-                color = LIGHTGRAY;
+                color = theme.oddTile;
             }
             position.x = offsetX + col * TILE_SIZE;
             position.y = offsetY + row * TILE_SIZE;
@@ -210,7 +214,7 @@ void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, con
     *outputOffsetY = (screenHeight - boardPixelHeight) / 2;
 }
 
-void Graphics_PrintScale(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY) {
+void Graphics_PrintCoordinates(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY) {
     u8 numberText[NUMBERS_TEXT_MAX_LENGTH] = {0};
     u8 letterText[LETTERS_TEXT_MAX_LENGTH] = {0};
     u8 letterVal = 'a';
@@ -241,7 +245,7 @@ void Graphics_PrintScale(const u16 boardSizeX, const u16 boardSizeY, const u32 b
 
         DrawText(letterText, posXLetter, offsetY + boardPixelHeight + 5, USUAL_FONT_SIZE, DARKGRAY);
         DrawText(letterText, posXLetter, offsetY - USUAL_FONT_SIZE - 5, USUAL_FONT_SIZE, DARKGRAY);
-        
+
         ++letterVal;
     }
 }

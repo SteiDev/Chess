@@ -10,6 +10,11 @@
 
 // [Piece related structs]
 
+typedef struct u16Vector2 {
+    u16 x;
+    u16 y;
+} u16Vector2;
+
 /**
  * @brief #### Chess pieces
  * @brief Contains all types of pieces.
@@ -37,7 +42,7 @@ typedef enum __color_t{
 // Defines the struct necessary to contain every special attributes of any piece type
 // [[UNIMPLEMENTED]]
 typedef struct __pieceAttributes_t{
-   bool __pawn_canMoveTwice__;  // for the ability to move 2 tiles for pawns if they havent been moved
+   bool pawn_LongMove;  // for the ability to move 2 tiles for pawns if they havent been moved
 }__pieceAttributes_t;
 
 /**
@@ -80,7 +85,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY);
  * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
  * @param skip_loading_screen Skip or not the loading screens.
  */
-void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr);
+void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, bool* restrict skip_loading_screen, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr);
 
 /**
  * @brief #### Loads the placement of the board from an ini file

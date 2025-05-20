@@ -33,12 +33,14 @@ i32 main() {
     bool validTo = false;
     bool highlightSelection = false;
     bool undoSelection = false;
+    bool showCoordinates = false;
     __color_t currentCol = white;  // white starts first
     pieceTextures_t whiteTextures = {0};
     pieceTextures_t blackTextures = {0};
     gameState_t gameState = checkFrom;
+    boardTheme_t boardTheme = THEME_CLASSIC;
     
-    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen, &fpsMax, &screenWidth, &screenHeight);
+    Board_Settings_LoadGeneral("config/table_config.ini", &Xsize, &Ysize, &skip_loading_screen, &fpsMax, &screenWidth, &screenHeight, &showCoordinates);
     
     mainBoard = Board_Init(Xsize, Ysize);
     
@@ -59,11 +61,14 @@ i32 main() {
     while(WindowShouldClose() == false) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        Graphics_DrawBoard(Xsize, Ysize, offsetX, offsetY);
+        Graphics_DrawBoard(Xsize, Ysize, offsetX, offsetY, boardTheme);
         
         Graphics_DrawPieces(mainBoard, Xsize, Ysize, whiteTextures, blackTextures, offsetX, offsetY);
         Graphics_PrintTurn(turnCounter, offsetX, offsetY, currentCol);
-        Graphics_PrintScale(Xsize, Ysize, boardPixelWidth, boardPixelHeight, offsetX, offsetY);
+
+        if(showCoordinates != false) {
+            Graphics_PrintCoordinates(Xsize, Ysize, boardPixelWidth, boardPixelHeight, offsetX, offsetY);
+        }
 
         // To highlight the current selected piece
         if(highlightSelection != false) {
