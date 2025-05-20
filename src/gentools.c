@@ -67,3 +67,29 @@ void Exception_CheckLoadedTexture(pieceTextures_t inptexture) {
         Exception_SendWarning("Warning: Failed to load pawn texture (Exception_CheckLoadedTexture)\n");
     }
 }
+
+void Debug_ResetDumpFile(void) {
+    FILE* dumpFile = fopen("debug/vardump.txt", "w");
+    if(dumpFile == NULL) {
+        Exception_SendWarning("Warning: Dump file cannot be opened (Debug_ResetDumpFile)\n");
+    }
+
+    fclose(dumpFile);
+}
+
+void Debug_DumpVariables(const u16 turnCounter, const u32 boardPixelWidth, const u32 boardPixelHeight, const i32 screenWidth, const i32 screenHeight, const i32 fpsMax, 
+                        const u16Vect2 boardSize, const u16Vect2 from, const u16Vect2 to, const f32Vect2 offset, u8* layoutName, const bool loadPreviousGame, 
+                        const bool validFrom, const bool validTo, const bool highlightSelection, const bool undoSelection, const bool showCoordinates, const __color_t currentCol,
+                        const gameState_t gameState) {
+    FILE* dumpFile = fopen("debug/vardump.txt", "a+w");
+    if(dumpFile != NULL) {
+        fprintf(dumpFile, "turnCounter: %hu\nboardPixelWidth: %u\nboardPixelHeight: %u\nscreenWidth: %d\nscreenHeight: %d\nfpsMax: %d\n", turnCounter, boardPixelWidth, boardPixelHeight, screenWidth, screenHeight, fpsMax);
+        fprintf(dumpFile, "boardSize.x: %hu\nboardSize.y: %hu\nfrom.x: %hu\nfrom.y: %hu\nto.x: %hu\nto.y: %hu\noffset.x: %f\noffset.y: %f\nlayoutName: %s\nloadPreviousGame: %hhu\n", boardSize.x, boardSize.y, from.x, from.y, to.x, to.y, offset.x, offset.y, layoutName, loadPreviousGame);
+        fprintf(dumpFile, "validFrom: %hhu\nvalidTo: %hhu\nhighlightSelection: %hhu\nundoSelection: %hhu\nshowCoordinates: %hhu\ncurrentCol: %d\n", validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol);
+        fprintf(dumpFile, "gameState: %d\n\n", gameState);
+    } else {
+        Exception_SendWarning("Warning: Dump file cannot be opened (Debug_DumpVariables)\n");
+    }
+
+    fclose(dumpFile);
+}

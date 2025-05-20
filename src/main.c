@@ -53,6 +53,10 @@ i32 main() {
     Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
+    #ifdef DEBUG
+    Debug_ResetDumpFile();
+    #endif
+
     while(WindowShouldClose() == false) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -89,6 +93,9 @@ i32 main() {
                 }
                 break;
             case move:
+                #ifdef DEBUG
+                    Debug_DumpVariables(turnCounter, boardPixelWidth, boardPixelHeight, screenWidth, screenHeight, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
+                #endif
                 Piece_Move(&mainBoard, from, to);
                 Board_Turn_NextColor(&currentCol);
                 ++turnCounter;
