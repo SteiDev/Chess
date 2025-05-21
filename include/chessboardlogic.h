@@ -35,9 +35,8 @@ typedef enum __color_t{
 }__color_t;
 
 // Defines the struct necessary to contain every special attributes of any piece type
-// [[UNIMPLEMENTED]]
 typedef struct __pieceAttributes_t{
-   bool pawn_LongMove;  // for the ability to move 2 tiles for pawns if they havent been moved
+   bool hasMoved;  // useful to check for double first move and pawn promotion
 }__pieceAttributes_t;
 
 /**
@@ -49,6 +48,7 @@ typedef struct __pieceAttributes_t{
 typedef struct playerPiece_t{
     __chesspiece_t pieceType;
     __color_t pieceColor;
+    __pieceAttributes_t pieceAttributes;
 }playerPiece_t;
 
 typedef enum gameState_t {

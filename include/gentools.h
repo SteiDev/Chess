@@ -4,7 +4,6 @@
 #define __GENTOOLS_H__
 
 #include "../include/typedefs.h"
-#include "../include/gameTexts.h"
 #include "../include/graphics.h"
 
 /** * @brief #### Exit on fatal errors if the macro is defined */

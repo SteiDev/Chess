@@ -2,7 +2,6 @@
 // should go
 
 #include "../include/chessboardlogic.h"
-#include "../include/gameTexts.h"
 #include "../include/typedefs.h"
 #include "../include/gentools.h"
 #include "../include/pieceMoves.h"
@@ -18,8 +17,6 @@
 
 playerPiece_t** Board_Init(const u16Vect2 boardSize) {
     playerPiece_t** mainBoard = NULL;
-
-    printf(LOADING_MESSAGE_BOARD_EN);
 
     mainBoard = (playerPiece_t**)malloc(sizeof(playerPiece_t*) * boardSize.y);
     if(mainBoard == NULL){
@@ -38,6 +35,7 @@ playerPiece_t** Board_Init(const u16Vect2 boardSize) {
         for(u16 Xindex = 0; Xindex < boardSize.x; ++Xindex){
             mainBoard[Yindex][Xindex].pieceColor = color_NONE;
             mainBoard[Yindex][Xindex].pieceType = piece_NONE;
+            mainBoard[Yindex][Xindex].pieceAttributes.hasMoved = false;
         }
     }
 
@@ -92,7 +90,7 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect
 
 NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord) {
     FILE* ini_ptr = NULL;
-    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE};
+    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE, {false}};
     u16Vect2 boardPlacementBuffer = {0};
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
     
@@ -204,45 +202,41 @@ NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 bo
 NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
         f32Vect2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSize.y, offset);
-        i8 validPieceMove = INVALID_MOVE;
+        bool validPieceMove = false;
         if(Board_IsInsideBoard(mousePos, boardSize) != false) {
             to_ptr->x = (u16)mousePos.x;
             to_ptr->y = (u16)mousePos.y;
 
-            switch(mainBoard[from.y][from.x].pieceType){
-                case pawn:
-                    validPieceMove = __CheckValidMove_Pawn__(mainBoard, from, *to_ptr);
-                    break;
-                case knight:
-                    validPieceMove = __CheckValidMove_Knight__(from, *to_ptr, boardSize);
-                    break;
-                case bishop:
-                    validPieceMove = __CheckValidMove_Bishop__(mainBoard, from, *to_ptr, boardSize);
-                    break;
-                case rook:
-                    validPieceMove = __CheckValidMove_Rook__(mainBoard, from, *to_ptr, boardSize);
-                    break;
-                case queen:
-                    validPieceMove = __CheckValidMove_Queen__(mainBoard, from, *to_ptr, boardSize);
-                    break;
-                case king:
-                    validPieceMove = __CheckValidMove_King__(from, *to_ptr);
-                    break;
-                default:    
-                    printf("Unimplemented (Board_Turn_Read)\n");
-                    validPieceMove = INVALID_MOVE;
+            if(Piece_CheckOwnerDestination(mainBoard, from, *to_ptr) != false /* place function to check castling here*/) {
+                switch(mainBoard[from.y][from.x].pieceType) {
+                    case pawn:
+                        validPieceMove = __CheckValidMove_Pawn__(mainBoard, from, *to_ptr);
+                        break;
+                    case knight:
+                        validPieceMove = __CheckValidMove_Knight__(from, *to_ptr, boardSize);
+                        break;
+                    case bishop:
+                        validPieceMove = __CheckValidMove_Bishop__(mainBoard, from, *to_ptr, boardSize);
+                        break;
+                    case rook:
+                        validPieceMove = __CheckValidMove_Rook__(mainBoard, from, *to_ptr, boardSize);
+                        break;
+                    case queen:
+                        validPieceMove = __CheckValidMove_Queen__(mainBoard, from, *to_ptr, boardSize);
+                        break;
+                    case king:
+                        validPieceMove = __CheckValidMove_King__(from, *to_ptr);
+                        break;
+                    default:    
+                        printf("Unimplemented (Board_Turn_Read)\n");
+                        validPieceMove = false;
+                }
+                return validPieceMove;
             }
-            if(validPieceMove == VALID_MOVE) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
         }
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset) {

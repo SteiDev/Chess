@@ -1,6 +1,5 @@
 #include "../include/graphics.h"
 #include "../include/typedefs.h"
-#include "../include/gameTexts.h"
 #include "../include/chessboardlogic.h"
 #include "../include/gentools.h"
 

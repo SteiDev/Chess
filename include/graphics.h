@@ -10,6 +10,7 @@
 #define TILE_SIZE 60
 #define USUAL_FONT_SIZE 25
 
+#define WINDOW_TITLE "Chess"
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 640
 #define TARGET_FPS 60
