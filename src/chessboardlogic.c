@@ -16,26 +16,26 @@
 #define __CONFIG_INI_MAX_SIZE__ 120
 #define __TURN_COLOR_MAX_SIZE__ 50
 
-playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
+playerPiece_t** Board_Init(const u16Vect2 boardSize) {
     playerPiece_t** mainBoard = NULL;
 
     printf(LOADING_MESSAGE_BOARD_EN);
 
-    mainBoard = (playerPiece_t**)malloc(sizeof(playerPiece_t*) * boardSizeY);
+    mainBoard = (playerPiece_t**)malloc(sizeof(playerPiece_t*) * boardSize.y);
     if(mainBoard == NULL){
         #ifdef EXIT_ON_FATAL_ERROR
         fprintf(stderr, "Fatal Error: Main board allocation failed (Board_Init)\n");
         exit(EXIT_FAILURE);
         #endif
     }else{
-        for(u16 allocIndex = 0; allocIndex < boardSizeY; ++allocIndex){
-            mainBoard[allocIndex] = (playerPiece_t*)malloc(sizeof(playerPiece_t) * boardSizeX);
+        for(u16 allocIndex = 0; allocIndex < boardSize.y; ++allocIndex){
+            mainBoard[allocIndex] = (playerPiece_t*)malloc(sizeof(playerPiece_t) * boardSize.x);
             Exception_CheckNULLPtr((playerPiece_t*)mainBoard[allocIndex], "Fatal Error: board tiles allocation failed (Board_Init)\n");
         }
     }
 
-    for(u16 Yindex = 0; Yindex < boardSizeY; ++Yindex){
-        for(u16 Xindex = 0; Xindex < boardSizeX; ++Xindex){
+    for(u16 Yindex = 0; Yindex < boardSize.y; ++Yindex){
+        for(u16 Xindex = 0; Xindex < boardSize.x; ++Xindex){
             mainBoard[Yindex][Xindex].pieceColor = color_NONE;
             mainBoard[Yindex][Xindex].pieceType = piece_NONE;
         }
@@ -44,7 +44,7 @@ playerPiece_t** Board_Init(const u16 boardSizeX, const u16 boardSizeY){
     return mainBoard;
 }
 
-NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XBoardCoord, u16* YBoardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr){
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr) {
     FILE* ini_ptr = NULL;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
     
@@ -58,7 +58,7 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XB
             Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
         }else{
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "table_size = %hux%hu", XBoardCoord, YBoardCoord);
+                sscanf(ini_filecontent, "table_size = %hux%hu", &boardCoord->x, &boardCoord->y);
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
@@ -90,11 +90,10 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16* XB
     fclose(ini_ptr);
 }
 
-NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16 XBoardCoord, const u16 YBoardCoord){
+NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord) {
     FILE* ini_ptr = NULL;
     playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE};
-    u16 XBoard_Placement_Buffer = 0;
-    u16 YBoard_Placement_Buffer = 0;
+    u16Vect2 boardPlacementBuffer = {0};
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
     
     ini_ptr = fopen(ini_filename, "r");
@@ -105,10 +104,10 @@ NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*
             Exception_SendWarning("Warning: Incompatible Ini file content (Board_Placement)\n");
         }else{
             while(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "piece = %c[%hu][%hu], color = %c", (u8*)&piece_Placement_Buffer.pieceType, &YBoard_Placement_Buffer, &XBoard_Placement_Buffer, (u8*)&piece_Placement_Buffer.pieceColor);
-                if(Exception_CheckBounds(XBoard_Placement_Buffer, YBoard_Placement_Buffer, XBoardCoord, YBoardCoord, false) == IN_BOUNDS){
-                    (*main_board_ptr)[YBoard_Placement_Buffer][XBoard_Placement_Buffer].pieceColor = piece_Placement_Buffer.pieceColor;
-                    (*main_board_ptr)[YBoard_Placement_Buffer][XBoard_Placement_Buffer].pieceType = piece_Placement_Buffer.pieceType;
+                sscanf(ini_filecontent, "piece = %c[%hu][%hu], color = %c", (u8*)&piece_Placement_Buffer.pieceType, &boardPlacementBuffer.y, &boardPlacementBuffer.x, (u8*)&piece_Placement_Buffer.pieceColor);
+                if(Exception_CheckBounds(boardPlacementBuffer.x, boardPlacementBuffer.y, boardCoord.x, boardCoord.y, false) == IN_BOUNDS){
+                    (*main_board_ptr)[boardPlacementBuffer.y][boardPlacementBuffer.x].pieceColor = piece_Placement_Buffer.pieceColor;
+                    (*main_board_ptr)[boardPlacementBuffer.y][boardPlacementBuffer.x].pieceType = piece_Placement_Buffer.pieceType;
                 }
             }
         }
@@ -137,7 +136,7 @@ NONNULL void Board_Turn_NextColor(__color_t* restrict color_ptr){
     }
 }
 
-NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 XBoardCoord, const u16 YBoardCoord, u8* restrict filename){
+NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u8* restrict filename) {
     FILE* saveFile_ptr = NULL;
 
     saveFile_ptr = fopen(filename, "w");
@@ -145,8 +144,8 @@ NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16 X
 
     fprintf(saveFile_ptr, "[layout]\n");
 
-    for(u16 boardIndexY = 0; boardIndexY < YBoardCoord; ++boardIndexY){
-        for(u16 boardIndexX = 0; boardIndexX < XBoardCoord; ++boardIndexX){
+    for(u16 boardIndexY = 0; boardIndexY < boardSize.y; ++boardIndexY){
+        for(u16 boardIndexX = 0; boardIndexX < boardSize.x; ++boardIndexX){
             if(mainBoard[boardIndexY][boardIndexX].pieceColor != color_NONE){
                 fprintf(saveFile_ptr, "piece = %c[%hu][%hu], color = %c\n", mainBoard[boardIndexY][boardIndexX].pieceType, boardIndexY, boardIndexX, mainBoard[boardIndexY][boardIndexX].pieceColor);
             }
@@ -172,21 +171,21 @@ NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt){
     }
 }
 
-bool Board_IsInsideBoard(const Vector2 mousePos, const u16 boardSizeX, const u16 boardSizeY) {
-    if((mousePos.x < 0 || mousePos.x >= boardSizeX) || (mousePos.y < 0 || mousePos.y >= boardSizeY)) {
+bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize) {
+    if((mousePos.x < 0 || mousePos.x >= boardSize.x) || (mousePos.y < 0 || mousePos.y >= boardSize.y)) {
         return false;
     } else {
         return true;
     }
 }
 
-NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, u16* fromX_ptr, u16* fromY_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32 offsetX, const f32 offsetY) {
+NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16Vect2* restrict from_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32Vect2 offset) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
-        Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
-        if(Board_IsInsideBoard(mousePos, boardSizeX, boardSizeY) != false) {
-            *fromX_ptr = (u16)mousePos.x;
-            *fromY_ptr = (u16)mousePos.y;
-            if(mainBoard[*fromY_ptr][*fromX_ptr].pieceColor == currentPlayerCol) {
+        f32Vect2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSize.y, offset);
+        if(Board_IsInsideBoard(mousePos, boardSize) != false) {
+            from_ptr->x = (u16)mousePos.x;
+            from_ptr->y = (u16)mousePos.y;
+            if(mainBoard[from_ptr->y][from_ptr->x].pieceColor == currentPlayerCol) {
                     *highlightSelection = true;
                     return true;
                 } else {
@@ -202,32 +201,32 @@ NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16 boardSi
     }
 }
 
-NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const u16 fromX, const u16 fromY, u16* toX_ptr, u16* toY_ptr, const f32 offsetX, const f32 offsetY) {
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
-        Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
+        f32Vect2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSize.y, offset);
         i8 validPieceMove = INVALID_MOVE;
-        if(Board_IsInsideBoard(mousePos, boardSizeX, boardSizeY) != false) {
-            *toX_ptr = (u16)mousePos.x;
-            *toY_ptr = (u16)mousePos.y;
+        if(Board_IsInsideBoard(mousePos, boardSize) != false) {
+            to_ptr->x = (u16)mousePos.x;
+            to_ptr->y = (u16)mousePos.y;
 
-            switch(mainBoard[fromY][fromX].pieceType){
+            switch(mainBoard[from.y][from.x].pieceType){
                 case pawn:
-                    validPieceMove = __CheckValidMove_Pawn__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr);
+                    validPieceMove = __CheckValidMove_Pawn__(mainBoard, from, *to_ptr);
                     break;
                 case knight:
-                    validPieceMove = __CheckValidMove_Knight__(fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    validPieceMove = __CheckValidMove_Knight__(from, *to_ptr, boardSize);
                     break;
                 case bishop:
-                    validPieceMove = __CheckValidMove_Bishop__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    validPieceMove = __CheckValidMove_Bishop__(mainBoard, from, *to_ptr, boardSize);
                     break;
                 case rook:
-                    validPieceMove = __CheckValidMove_Rook__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    validPieceMove = __CheckValidMove_Rook__(mainBoard, from, *to_ptr, boardSize);
                     break;
                 case queen:
-                    validPieceMove = __CheckValidMove_Queen__(mainBoard, fromX, fromY, *toX_ptr, *toY_ptr, boardSizeX, boardSizeY);
+                    validPieceMove = __CheckValidMove_Queen__(mainBoard, from, *to_ptr, boardSize);
                     break;
                 case king:
-                    validPieceMove = __CheckValidMove_King__(fromX, fromY, *toX_ptr, *toY_ptr);
+                    validPieceMove = __CheckValidMove_King__(from, *to_ptr);
                     break;
                 default:    
                     printf("Unimplemented (Board_Turn_Read)\n");
@@ -246,10 +245,10 @@ NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16 boardSize
     }
 }
 
-bool Board_UndoSelection(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY) {
+bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) != false) {
-        Vector2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSizeY, offsetX, offsetY);
-        if(Board_IsInsideBoard(mousePos, boardSizeX, boardSizeY) != false) {
+        f32Vect2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSize.y, offset);
+        if(Board_IsInsideBoard(mousePos, boardSize) != false) {
             return true;
         } else {
             return false;

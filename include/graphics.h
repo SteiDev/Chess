@@ -101,7 +101,7 @@ void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u1
  * @param boardSizeX The X coordinates (number of lines) of the board.
  * @param boardSizeY The Y coordinates (number of columns) of the board.
  */
-void Graphics_DrawBoard(const u16 boardSizeX, const u16 boardSizeY, const f32 offsetX, const f32 offsetY, const boardTheme_t theme);
+void Graphics_DrawBoard(const u16Vect2 boardSize, const f32Vect2 offset, const boardTheme_t theme);
 
 /**
  * @brief #### Load chesspieces textures
@@ -130,12 +130,12 @@ void Graphics_UnloadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* 
  * @param whitePieces The variable containing the textures for the white pieces.
  * @param blackPieces The variable containing the textures for the black pieces.
  */
-void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16 boardSizeX, const u16 boardSizeY, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32 offsetX, const f32 offsetY);
+void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32Vect2 offset);
 
-Vector2 Graphics_MapMouseToBoard(Vector2 mousePos, const u16 boardSizeY, const f32 offsetX, const f32 offsetY);
-void Graphics_CalculateBoardPixels(const u16 boardSizeX, const u16 boardSizeY, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight);
-void Graphics_PrintTurn(const u16 turnCounter, const f32 offsetX, const f32 offsetY, const __color_t currentColor);
-void Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight, f32* outputOffsetX, f32* outputOffsetY);
-void Graphics_PrintCoordinates(const u16 boardSizeX, const u16 boardSizeY, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32 offsetX, const f32 offsetY);
+f32Vect2 Graphics_MapMouseToBoard(f32Vect2 mousePos, const u16 boardSizeY, const f32Vect2 offset);
+void Graphics_CalculateBoardPixels(const u16Vect2 boardSize, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight);
+void Graphics_PrintTurn(const u16 turnCounter, const f32Vect2 offset, const __color_t currentColor);
+f32Vect2 Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight);
+void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32Vect2 offset);
 
 #endif  // end of __GRAPHICS_H__
