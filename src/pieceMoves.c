@@ -8,6 +8,11 @@
 #include <string.h>
 #include <limits.h>
 
+void Piece_ToggleSpecialMove(playerPiece_t*** board_ptr, const u16Vect2 from, const u16Vect2 to) {
+    (*board_ptr)[from.y][from.x].usedSpecialMove = false;
+    (*board_ptr)[to.y][to.x].usedSpecialMove = true;
+}
+
 bool Piece_CheckOwnerDestination(playerPiece_t** restrict board, const u16Vect2 from, const u16Vect2 to) {
     if(board[from.y][from.x].pieceColor != board[to.y][to.x].pieceColor) {
         return true;
@@ -23,14 +28,16 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16Vect2 from, con
     (*board_ptr)[from.y][from.x].pieceType = piece_NONE;
     (*board_ptr)[from.y][from.x].pieceColor = color_NONE;
 
-    (*board_ptr)[from.y][from.x].pieceAttributes.hasMoved = false;
-    (*board_ptr)[to.y][to.x].pieceAttributes.hasMoved = true;
-
-
+    Piece_ToggleSpecialMove(board_ptr, from, to);
 }
 
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to) {
-    __MovePiece__(board_ptr, from, to);
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling) {
+    if((*doCastling) == false) {
+        __MovePiece__(board_ptr, from, to);
+    } else {
+        *doCastling = false;
+        Piece_MoveCastling(board_ptr, from, to);
+    }
 }
 
 bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16Vect2 from, const __color_t currentTurnColor) {
@@ -44,7 +51,7 @@ bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16Vect2 from,
 bool __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to) {
     switch(mainBoard[from.y][from.x].pieceColor){
         case white:
-            if((from.x == to.x) && ((to.y == from.y + 1) || (to.y == from.y + 2 && mainBoard[from.y][from.x].pieceAttributes.hasMoved == false)) && (mainBoard[to.y][to.x].pieceColor == color_NONE)){
+            if((from.x == to.x) && ((to.y == from.y + 1) || (to.y == from.y + 2 && mainBoard[from.y][from.x].usedSpecialMove == false)) && (mainBoard[to.y][to.x].pieceColor == color_NONE)){
                 return true;
             }else if(((from.x -1 == to.x) || (from.x +1 == to.x)) && (to.y == from.y + 1) && (mainBoard[to.y][to.x].pieceColor == black)){
                 return true;
@@ -53,7 +60,7 @@ bool __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16Vect2 
             }
             break;
         case black:
-            if((from.x == to.x) && ((to.y == from.y - 1 || (to.y == from.y - 2 && mainBoard[from.y][from.x].pieceAttributes.hasMoved == false))) &&  (mainBoard[to.y][to.x].pieceColor == color_NONE)){
+            if((from.x == to.x) && ((to.y == from.y - 1 || (to.y == from.y - 2 && mainBoard[from.y][from.x].usedSpecialMove == false))) &&  (mainBoard[to.y][to.x].pieceColor == color_NONE)){
                 return true;
             }else if(((from.x -1 == to.x) || (from.x +1 == to.x)) && (to.y == from.y - 1) && (mainBoard[to.y][to.x].pieceColor == white)){
                 return true;
@@ -221,4 +228,60 @@ bool __CheckValidMove_King__(const u16Vect2 from, const u16Vect2 to) {
         }    
     }
     return false;
+}
+
+bool Piece_CheckCastling(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to) {
+    u16 startIndex = 0;
+    u16 stopIndex = 0;
+
+    if((mainBoard[from.y][from.x].pieceType == king && mainBoard[to.y][to.x].pieceType == rook) || (mainBoard[from.y][from.x].pieceType == rook && mainBoard[to.y][to.x].pieceType == king))
+    if(mainBoard[from.y][from.x].usedSpecialMove == false || mainBoard[to.y][to.x].usedSpecialMove == false) {
+        if(from.y == to.y) {
+            startIndex = Util_u16Min(from.x, to.x) + 1;
+            stopIndex = Util_u16Max(from.x, to.x);
+
+            if(startIndex >= stopIndex) {
+                return false;
+            }
+
+            for(u16 searchIndex = startIndex; searchIndex < stopIndex; ++searchIndex) {
+                if(mainBoard[from.y][searchIndex].pieceType != piece_NONE) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Piece_MoveCastling(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to) {
+    u16 kingX = 0;
+    u16 rookX = 0;
+    u16 newKingX = 0;
+    u16 newRookX = 0;
+    
+    // identify king and rook
+    if((*board_ptr)[from.y][from.x].pieceType == king) {
+        kingX = from.x;
+        rookX = to.x;
+    } else {
+        kingX = to.x;
+        rookX = from.x;
+    }
+
+    if(rookX > kingX) {
+        // kingside castling
+        newKingX = kingX + 2;
+        newRookX = kingX + 1;
+    } else {
+        // queenside castling
+        newKingX = kingX - 2;
+        newRookX = kingX - 1;
+    }
+
+    __MovePiece__(board_ptr, (u16Vect2){.x = kingX, .y = from.y}, (u16Vect2){.x = newKingX, .y = from.y});
+    __MovePiece__(board_ptr, (u16Vect2){.x = rookX, .y = from.y}, (u16Vect2){.x = newRookX, .y = from.y});
 }

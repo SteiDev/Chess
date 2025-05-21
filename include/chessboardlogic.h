@@ -34,11 +34,6 @@ typedef enum __color_t{
     black = 'b'
 }__color_t;
 
-// Defines the struct necessary to contain every special attributes of any piece type
-typedef struct __pieceAttributes_t{
-   bool hasMoved;  // useful to check for double first move and pawn promotion
-}__pieceAttributes_t;
-
 /**
  * @brief #### Playable piece type
  * @brief Contains all attributes that a chess piece should have in order to be playable.
@@ -48,7 +43,7 @@ typedef struct __pieceAttributes_t{
 typedef struct playerPiece_t{
     __chesspiece_t pieceType;
     __color_t pieceColor;
-    __pieceAttributes_t pieceAttributes;
+    bool usedSpecialMove;  // for pawn double move and castling
 }playerPiece_t;
 
 typedef enum gameState_t {
@@ -125,7 +120,7 @@ NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16Ve
 NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt);
 bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize);
 NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16Vect2* restrict from_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32Vect2 offset);
-NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset);
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling);
 bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset);
 
 #endif // __CHESSBOARDLOGIC_H__

@@ -17,7 +17,7 @@ bool Piece_CheckOwnerDestination(playerPiece_t** restrict board, const u16Vect2 
  * @param toX The X coordinates (number of lines) of the location where the piece should be moved.
  * @param toY The Y coordinates (number of columns) of the location where the piece should be moved.
  */
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to);
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling);
 
 /**
  * @brief #### Check the color of the piece
@@ -107,5 +107,9 @@ bool __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16Vect2
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
 bool __CheckValidMove_King__(const u16Vect2 from, const u16Vect2 to);
+
+bool Piece_CheckCastling(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to);
+void Piece_ToggleSpecialMove(playerPiece_t*** board_ptr, const u16Vect2 from, const u16Vect2 to);
+void Piece_MoveCastling(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to);
 
 #endif // __PIECEMOVES_H__
