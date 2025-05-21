@@ -44,7 +44,7 @@ playerPiece_t** Board_Init(const u16Vect2 boardSize) {
     return mainBoard;
 }
 
-NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr) {
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32Vect2* restrict screenSize_ptr, bool* showCoordinates_ptr) {
     FILE* ini_ptr = NULL;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
     
@@ -68,12 +68,12 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "screenWidth = %d", screenWidth_ptr);
+                sscanf(ini_filecontent, "screenWidth = %d", &screenSize_ptr->x);
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "screenHeight = %d", screenHeight_ptr);
+                sscanf(ini_filecontent, "screenHeight = %d", &screenSize_ptr->y);
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }

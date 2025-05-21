@@ -93,7 +93,7 @@ typedef struct pieceTextures_t {
  * @param screenHeight Height of the created window.
  * @param targetFPS The Maximum FPS for the created window.
  */
-void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u16 targetFPS);
+void Graphics_InitRaylib(const i32Vect2 screenSize, const i32 targetFPS);
 
 /**
  * @brief #### Draw graphic chessboard
@@ -133,9 +133,9 @@ void Graphics_UnloadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* 
 void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32Vect2 offset);
 
 f32Vect2 Graphics_MapMouseToBoard(f32Vect2 mousePos, const u16 boardSizeY, const f32Vect2 offset);
-void Graphics_CalculateBoardPixels(const u16Vect2 boardSize, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight);
+u32Vect2 Graphics_CalculateBoardPixels(const u16Vect2 boardSize);
 void Graphics_PrintTurn(const u16 turnCounter, const f32Vect2 offset, const __color_t currentColor);
-f32Vect2 Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight);
-void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32Vect2 offset);
+f32Vect2 Graphics_CalculateOffset(const i32Vect2 screenSize, const u32Vect2 boardPixelSize);
+void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32Vect2 boardPixelSize, const f32Vect2 offset);
 
 #endif  // end of __GRAPHICS_H__

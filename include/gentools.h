@@ -69,7 +69,7 @@ void Exception_CheckLoadedTexture(pieceTextures_t inptexture);
 
 void Debug_ResetDumpFile(void);
 
-void Debug_DumpVariables(const u16 turnCounter, const u32 boardPixelWidth, const u32 boardPixelHeight, const i32 screenWidth, const i32 screenHeight, const i32 fpsMax, 
+void Debug_DumpVariables(const u16 turnCounter, const u32Vect2 boardPixelSize, const i32Vect2 windowSize, const i32 fpsMax, 
                         const u16Vect2 boardSize, const u16Vect2 from, const u16Vect2 to, const f32Vect2 offset, u8* layoutName, const bool loadPreviousGame, 
                         const bool validFrom, const bool validTo, const bool highlightSelection, const bool undoSelection, const bool showCoordinates, const __color_t currentCol,
                         const gameState_t gameState);

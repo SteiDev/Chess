@@ -80,7 +80,7 @@ playerPiece_t** Board_Init(const u16Vect2 boardSize);
  * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
  * @param skip_loading_screen Skip or not the loading screens.
  */
-NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr);
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32Vect2* restrict screenSize_ptr, bool* showCoordinates_ptr);
 
 /**
  * @brief #### Loads the placement of the board from an ini file
