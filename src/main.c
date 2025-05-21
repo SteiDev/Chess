@@ -13,11 +13,9 @@
 i32 main() {
     playerPiece_t** mainBoard = NULL;
     u16 turnCounter = 1;  // starts at turn 1
-    u32 boardPixelWidth = 0;
-    u32 boardPixelHeight = 0;
-    i32 screenWidth = 0;
-    i32 screenHeight = 0;
     i32 fpsMax = 0;
+    u32Vect2 boardPixelSize = {0};
+    i32Vect2 windowSize = {0};
     u16Vect2 boardSize = {0};
     u16Vect2 from = {0};
     u16Vect2 to = {0};
@@ -35,7 +33,7 @@ i32 main() {
     gameState_t gameState = checkFrom;
     boardTheme_t boardTheme = THEME_CLASSIC;
 
-    Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &screenWidth, &screenHeight, &showCoordinates);
+    Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates);
     
     mainBoard = Board_Init(boardSize);
     
@@ -47,10 +45,10 @@ i32 main() {
         layoutName = "saves/gamesave.ini";
     }
     
-    Graphics_CalculateBoardPixels(boardSize, &boardPixelHeight, &boardPixelWidth);
-    offset = Graphics_CalculateOffset(screenWidth, screenHeight, boardPixelWidth, boardPixelHeight);
+    boardPixelSize = Graphics_CalculateBoardPixels(boardSize);
+    offset = Graphics_CalculateOffset(windowSize, boardPixelSize);
     Board_LoadPlacement(layoutName, &mainBoard, boardSize);
-    Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
+    Graphics_InitRaylib(windowSize, fpsMax);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
     #ifdef DEBUG
@@ -66,7 +64,7 @@ i32 main() {
         Graphics_PrintTurn(turnCounter, offset, currentCol);
 
         if(showCoordinates != false) {
-            Graphics_PrintCoordinates(boardSize, boardPixelWidth, boardPixelHeight, offset);
+            Graphics_PrintCoordinates(boardSize, boardPixelSize, offset);
         }
 
         // To highlight the current selected piece
@@ -94,7 +92,7 @@ i32 main() {
                 break;
             case move:
                 #ifdef DEBUG
-                    Debug_DumpVariables(turnCounter, boardPixelWidth, boardPixelHeight, screenWidth, screenHeight, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
+                    Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
                 #endif
                 Piece_Move(&mainBoard, from, to);
                 Board_Turn_NextColor(&currentCol);

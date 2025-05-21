@@ -35,9 +35,8 @@ typedef enum __color_t{
 }__color_t;
 
 // Defines the struct necessary to contain every special attributes of any piece type
-// [[UNIMPLEMENTED]]
 typedef struct __pieceAttributes_t{
-   bool pawn_LongMove;  // for the ability to move 2 tiles for pawns if they havent been moved
+   bool hasMoved;  // useful to check for double first move and pawn promotion
 }__pieceAttributes_t;
 
 /**
@@ -49,6 +48,7 @@ typedef struct __pieceAttributes_t{
 typedef struct playerPiece_t{
     __chesspiece_t pieceType;
     __color_t pieceColor;
+    __pieceAttributes_t pieceAttributes;
 }playerPiece_t;
 
 typedef enum gameState_t {
@@ -80,7 +80,7 @@ playerPiece_t** Board_Init(const u16Vect2 boardSize);
  * @param YBoardCoord Pointer to the Y coordinates (number of columns) of the board.
  * @param skip_loading_screen Skip or not the loading screens.
  */
-NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr);
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32Vect2* restrict screenSize_ptr, bool* showCoordinates_ptr);
 
 /**
  * @brief #### Loads the placement of the board from an ini file

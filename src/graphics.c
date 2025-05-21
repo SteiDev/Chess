@@ -1,6 +1,5 @@
 #include "../include/graphics.h"
 #include "../include/typedefs.h"
-#include "../include/gameTexts.h"
 #include "../include/chessboardlogic.h"
 #include "../include/gentools.h"
 
@@ -83,8 +82,8 @@ static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 X
     DrawTexture(loadedTexture, textureX, textureY, loadedColor);
 }
 
-void Graphics_InitRaylib(const u16 screenWidth, const u16 screenHeight, const u16 targetFPS) {
-    InitWindow(screenWidth, screenHeight, WINDOW_TITLE);
+void Graphics_InitRaylib(const i32Vect2 screenSize, const i32 targetFPS) {
+    InitWindow(screenSize.x, screenSize.y, WINDOW_TITLE);
     SetTargetFPS(targetFPS);
 }
 
@@ -204,16 +203,15 @@ void Graphics_PrintTurn(const u16 turnCounter, const f32Vect2 offset, const __co
     DrawText(finalText, textPosX, textPosY, 25, playerColor);
 }
 
-void Graphics_CalculateBoardPixels(const u16Vect2 boardSize, u32* outputBoardPixelWidth, u32* outputBoardPixelHeight) {
-    *outputBoardPixelWidth = TILE_SIZE * boardSize.x;
-    *outputBoardPixelHeight = TILE_SIZE * boardSize.y;
+u32Vect2 Graphics_CalculateBoardPixels(const u16Vect2 boardSize) {
+    return (u32Vect2){.x = TILE_SIZE * boardSize.x, .y = TILE_SIZE * boardSize.y};
 }
 
-f32Vect2 Graphics_CalculateOffset(const i32 screenWidth, const i32 screenHeight, const u32 boardPixelWidth, const u32 boardPixelHeight) {
-    return (f32Vect2){.x = (screenWidth - boardPixelWidth) / 2, .y = (screenHeight - boardPixelHeight) / 2};
+f32Vect2 Graphics_CalculateOffset(const i32Vect2 screenSize, const u32Vect2 boardPixelSize) {
+    return (f32Vect2){.x = (screenSize.x - boardPixelSize.x) / 2, .y = (screenSize.y - boardPixelSize.y) / 2};
 }
 
-void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32 boardPixelWidth, const u32 boardPixelHeight, const f32Vect2 offset) {
+void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32Vect2 boardPixelSize, const f32Vect2 offset) {
     u8 numberText[NUMBERS_TEXT_MAX_LENGTH] = {0};
     u8 letterText[LETTERS_TEXT_MAX_LENGTH] = {0};
     u8 letterVal = 'a';
@@ -231,7 +229,7 @@ void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32 boardPixelWid
         posYNumber = offset.y + ((boardSize.y - 1 - currentY) * TILE_SIZE) + TILE_SIZE / 2 - USUAL_FONT_SIZE / 2;
 
         DrawText(numberText, offset.x - textWidthNumber - 5, posYNumber, USUAL_FONT_SIZE, DARKGRAY);
-        DrawText(numberText, offset.x + boardPixelWidth + 5, posYNumber, USUAL_FONT_SIZE, DARKGRAY);
+        DrawText(numberText, offset.x + boardPixelSize.x + 5, posYNumber, USUAL_FONT_SIZE, DARKGRAY);
 
         ++numberVal;
     }
@@ -242,7 +240,7 @@ void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32 boardPixelWid
         textWidthLetter = MeasureText(letterText, USUAL_FONT_SIZE);
         posXLetter = offset.x + (x * TILE_SIZE) + TILE_SIZE / 2 - textWidthLetter / 2;
 
-        DrawText(letterText, posXLetter, offset.y + boardPixelHeight + 5, USUAL_FONT_SIZE, DARKGRAY);
+        DrawText(letterText, posXLetter, offset.y + boardPixelSize.y + 5, USUAL_FONT_SIZE, DARKGRAY);
         DrawText(letterText, posXLetter, offset.y - USUAL_FONT_SIZE - 5, USUAL_FONT_SIZE, DARKGRAY);
 
         ++letterVal;
