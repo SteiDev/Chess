@@ -22,10 +22,14 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16Vect2 from, con
 
     (*board_ptr)[from.y][from.x].pieceType = piece_NONE;
     (*board_ptr)[from.y][from.x].pieceColor = color_NONE;
+
+    (*board_ptr)[from.y][from.x].pieceAttributes.hasMoved = false;
+    (*board_ptr)[to.y][to.x].pieceAttributes.hasMoved = true;
+
+
 }
 
 void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to) {
-    // __Piece_CheckAndMove__(board_ptr, from, to);   
     __MovePiece__(board_ptr, from, to);
 }
 
