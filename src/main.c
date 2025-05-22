@@ -28,6 +28,7 @@ i32 main() {
     bool undoSelection = false;
     bool showCoordinates = false;
     bool doCastling = false;
+    bool doPawnPromotion = false;
     __color_t currentCol = white;  // white starts first
     pieceTextures_t whiteTextures = {0};
     pieceTextures_t blackTextures = {0};
@@ -81,7 +82,7 @@ i32 main() {
                 break;
             case checkTo:
                 undoSelection = Board_UndoSelection(boardSize, offset);
-                validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
+                validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling, &doPawnPromotion);
 
                 if(undoSelection != false) {
                     gameState = checkFrom;
@@ -95,7 +96,7 @@ i32 main() {
                 #ifdef DEBUG
                     Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
                 #endif
-                Piece_Move(&mainBoard, from, to, &doCastling);
+                Piece_Move(&mainBoard, from, to, &doCastling, &doPawnPromotion);
                 Board_Turn_NextColor(&currentCol);
                 ++turnCounter;
                 Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");

@@ -246,3 +246,7 @@ void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32Vect2 boardPix
         ++letterVal;
     }
 }
+
+__chesspiece_t Graphics_DoPawnPromotionPopup(void) {
+    ;
+}

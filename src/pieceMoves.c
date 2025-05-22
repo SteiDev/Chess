@@ -21,7 +21,7 @@ bool Piece_CheckOwnerDestination(playerPiece_t** restrict board, const u16Vect2 
     }
 }
 
-void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to) {
+static void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to) {
     (*board_ptr)[to.y][to.x].pieceType = (*board_ptr)[from.y][from.x].pieceType;
     (*board_ptr)[to.y][to.x].pieceColor = (*board_ptr)[from.y][from.x].pieceColor;
 
@@ -31,12 +31,16 @@ void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16Vect2 from, con
     Piece_ToggleSpecialMove(board_ptr, from, to);
 }
 
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling) {
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling, bool* restrict doPawnPromotion) {
     if((*doCastling) == false) {
         __MovePiece__(board_ptr, from, to);
     } else {
         *doCastling = false;
         Piece_MoveCastling(board_ptr, from, to);
+    }
+    if(*doPawnPromotion != false) {
+        printf("Pawn promotion (TO BE IMPLEMENTED)\n");
+        *doPawnPromotion = false;
     }
 }
 
@@ -284,4 +288,14 @@ void Piece_MoveCastling(playerPiece_t*** restrict board_ptr, const u16Vect2 from
 
     __MovePiece__(board_ptr, (u16Vect2){.x = kingX, .y = from.y}, (u16Vect2){.x = newKingX, .y = from.y});
     __MovePiece__(board_ptr, (u16Vect2){.x = rookX, .y = from.y}, (u16Vect2){.x = newRookX, .y = from.y});
+}
+
+bool Piece_CheckPawnPromotion(playerPiece_t** restrict board, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize) {
+    if(board[from.y][from.x].usedSpecialMove != false) {
+        if(to.y == 0 || to.y == boardSize.y - 1) {
+            return true;
+        }
+    }
+
+    return false;
 }
