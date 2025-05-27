@@ -17,7 +17,7 @@ bool Piece_CheckOwnerDestination(playerPiece_t** restrict board, const u16Vect2 
  * @param toX The X coordinates (number of lines) of the location where the piece should be moved.
  * @param toY The Y coordinates (number of columns) of the location where the piece should be moved.
  */
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling, bool* restrict doPawnPromotion);
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling);
 
 /**
  * @brief #### Check the color of the piece

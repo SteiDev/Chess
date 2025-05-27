@@ -13,7 +13,6 @@
 #define WINDOW_TITLE "Chess"
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 640
-#define TARGET_FPS 60
 
 #define COLOR_LIGHT_WOOD (Color){ 222, 184, 135, 255 }
 #define COLOR_DARK_WOOD (Color){ 101, 67, 33, 255 }
@@ -134,9 +133,11 @@ void Graphics_UnloadTextures(pieceTextures_t* whitePieces_ptr, pieceTextures_t* 
 void Graphics_DrawPieces(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32Vect2 offset);
 
 f32Vect2 Graphics_MapMouseToBoard(f32Vect2 mousePos, const u16 boardSizeY, const f32Vect2 offset);
+f32Vect2 Graphics_MapBoardToMouse(const u16Vect2 boardPos, const u16 boardSizeY, const f32Vect2 offset);
 u32Vect2 Graphics_CalculateBoardPixels(const u16Vect2 boardSize);
 void Graphics_PrintTurn(const u16 turnCounter, const f32Vect2 offset, const __color_t currentColor);
 f32Vect2 Graphics_CalculateOffset(const i32Vect2 screenSize, const u32Vect2 boardPixelSize);
 void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32Vect2 boardPixelSize, const f32Vect2 offset);
+void Graphics_PawnPromotionPopup(f32Vect2 position, const pieceTextures_t textures);
 
 #endif  // end of __GRAPHICS_H__

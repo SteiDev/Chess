@@ -199,7 +199,7 @@ NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 bo
     }
 }
 
-NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling, bool* restrict doPawnPromotion) {
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
         f32Vect2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSize.y, offset);
         bool validPieceMove = false;
@@ -213,7 +213,6 @@ NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boar
                     switch(mainBoard[from.y][from.x].pieceType) {
                         case pawn:
                             validPieceMove = __CheckValidMove_Pawn__(mainBoard, from, *to_ptr);
-                            *doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, *to_ptr, boardSize);
                             break;
                         case knight:
                             validPieceMove = __CheckValidMove_Knight__(from, *to_ptr, boardSize);

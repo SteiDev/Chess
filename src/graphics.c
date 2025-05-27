@@ -12,23 +12,15 @@
 #define NUMBERS_TEXT_MAX_LENGTH 6
 #define LETTERS_TEXT_MAX_LENGTH 3
 
+#define POPUP_BUTTON_X 50
+#define POPUP_BUTTON_Y 40
+#define POPUP_BUTTON_SPACING 40
+#define POPUP_BUTTON_COUNT 4
+
 static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 Xcoord, const u16 Ycoord, const pieceTextures_t whitePieces, const pieceTextures_t blackPieces, const f32Vect2 offset) {
     f32 textureX = 0;
     f32 textureY = 0;
     Texture2D loadedTexture = {0};
-    Color loadedColor = {0};
-
-    switch(currentPiece.pieceColor) {
-        case white:
-            loadedColor = WHITE;
-            break;
-        case black:
-            loadedColor = BLACK;
-            break;
-        default:
-        Exception_SendWarning("Warning: Invalid piece texture color (__Graphics_DrawPiece__)\n");
-        return;
-    }
 
     switch(currentPiece.pieceType) {
         case rook:
@@ -79,7 +71,7 @@ static void __Graphics_DrawPiece__(const playerPiece_t currentPiece, const u16 X
     textureX = offset.x + Xcoord * TILE_SIZE + (TILE_SIZE - loadedTexture.width) / 2;
     textureY = offset.y + Ycoord * TILE_SIZE + (TILE_SIZE - loadedTexture.height) / 2;
 
-    DrawTexture(loadedTexture, textureX, textureY, loadedColor);
+    DrawTexture(loadedTexture, textureX, textureY, WHITE);
 }
 
 void Graphics_InitRaylib(const i32Vect2 screenSize, const i32 targetFPS) {
@@ -173,6 +165,23 @@ f32Vect2 Graphics_MapMouseToBoard(f32Vect2 mousePos, const u16 boardSizeY, const
     return mousePos;
 }
 
+static f32Vect2 Graphics_ConvertToPoint(f32Vect2 boardPos, const f32Vect2 offset) {
+    boardPos.x = (boardPos.x / TILE_SIZE) + offset.x;
+    boardPos.y = (boardPos.y / TILE_SIZE) + offset.y;
+
+    return boardPos;
+}
+
+f32Vect2 Graphics_MapBoardToMouse(const u16Vect2 boardPos, const u16 boardSizeY, const f32Vect2 offset) {
+    f32Vect2 fboardPos = (f32Vect2){(f32)boardPos.x, (f32)boardPos.y};
+
+    f32Vect2 mousePos = Graphics_FlipAxis(fboardPos, boardSizeY);
+    mousePos = Graphics_ConvertToPoint(fboardPos, offset);
+
+
+    return mousePos;
+}
+
 void Graphics_PrintTurn(const u16 turnCounter, const f32Vect2 offset, const __color_t currentColor) {
     u8* colorText = NULL;
     u8 finalText[TURN_TEXT_MAX_LENGTH] = {0};
@@ -247,6 +256,12 @@ void Graphics_PrintCoordinates(const u16Vect2 boardSize, const u32Vect2 boardPix
     }
 }
 
-__chesspiece_t Graphics_DoPawnPromotionPopup(void) {
-    ;
+void Graphics_PawnPromotionPopup(f32Vect2 position, const pieceTextures_t textures) {
+    Texture2D popupTextures[] = {textures.rook, textures.knight, textures.bishop, textures.queen};
+
+    for(u8_EXPLICIT buttonIndex = 0; buttonIndex < POPUP_BUTTON_COUNT; ++buttonIndex) {
+        DrawRectangle((i32)position.x, (i32)position.y,POPUP_BUTTON_X, POPUP_BUTTON_Y, GRAY);
+        DrawTexture(popupTextures[buttonIndex], (i32)position.x, (i32)position.y, WHITE);
+        position.x += POPUP_BUTTON_SPACING;
+    }
 }

@@ -49,7 +49,8 @@ typedef struct playerPiece_t{
 typedef enum gameState_t {
     checkFrom,
     checkTo,
-    move
+    move,
+    promotePawn
 } gameState_t;
 
 // [Board related functions]
@@ -120,7 +121,7 @@ NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16Ve
 NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt);
 bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize);
 NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16Vect2* restrict from_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32Vect2 offset);
-NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling, bool* restrict doPawnPromotion);
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling);
 bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset);
 
 #endif // __CHESSBOARDLOGIC_H__

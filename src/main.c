@@ -19,6 +19,7 @@ i32 main() {
     u16Vect2 boardSize = {0};
     u16Vect2 from = {0};
     u16Vect2 to = {0};
+    f32Vect2 pawnPromotionPos = {0};    
     f32Vect2 offset = {0};
     u8* layoutName = NULL;
     bool loadPreviousGame = false;
@@ -29,9 +30,11 @@ i32 main() {
     bool showCoordinates = false;
     bool doCastling = false;
     bool doPawnPromotion = false;
+    bool pawnUpgradeSelected = false;
     __color_t currentCol = white;  // white starts first
     pieceTextures_t whiteTextures = {0};
     pieceTextures_t blackTextures = {0};
+    pieceTextures_t pawnPromoteTextures = {0};
     gameState_t gameState = checkFrom;
     boardTheme_t boardTheme = THEME_CLASSIC;
 
@@ -82,7 +85,7 @@ i32 main() {
                 break;
             case checkTo:
                 undoSelection = Board_UndoSelection(boardSize, offset);
-                validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling, &doPawnPromotion);
+                validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
 
                 if(undoSelection != false) {
                     gameState = checkFrom;
@@ -96,12 +99,43 @@ i32 main() {
                 #ifdef DEBUG
                     Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
                 #endif
-                Piece_Move(&mainBoard, from, to, &doCastling, &doPawnPromotion);
+                doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, to, boardSize);
+                Piece_Move(&mainBoard, from, to, &doCastling);
                 Board_Turn_NextColor(&currentCol);
                 ++turnCounter;
-                Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
-                gameState = checkFrom;
+
+                if(doPawnPromotion == true) {
+                    gameState = promotePawn;
+                    doPawnPromotion = false;
+                    pawnPromotionPos = Graphics_MapBoardToMouse(to, boardSize.y, offset);
+            
+                    if(currentCol == white) { /* The colors are inverted because this happens after the colors are changed */
+                        pawnPromoteTextures = blackTextures;
+                    } else {
+                        pawnPromoteTextures = whiteTextures;
+                    }
+                } else {
+                    gameState = checkFrom;
+                    Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                }
+
                 highlightSelection = false;
+                break;
+            case promotePawn:
+                Graphics_PawnPromotionPopup(pawnPromotionPos, pawnPromoteTextures);
+
+                /* Here should be a function that checks if the player clicks inside the popup window and which piece is selected 
+                    and there should be another function that actually changes the piece to the selected one on the board    */
+                
+                /* If a piece was chosen pawnUpgradeSelected should be changed to true */
+
+                if(pawnUpgradeSelected != false) {
+                    Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                }
+
+                /* Currently not implemented so it should skip this state */
+
+                gameState = checkFrom;
                 break;
             default:
             Exception_SendWarning("Warning: Invalid game state (main)\n");

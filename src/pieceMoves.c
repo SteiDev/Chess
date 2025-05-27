@@ -31,16 +31,12 @@ static void __MovePiece__(playerPiece_t*** restrict board_ptr, const u16Vect2 fr
     Piece_ToggleSpecialMove(board_ptr, from, to);
 }
 
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling, bool* restrict doPawnPromotion) {
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling) {
     if((*doCastling) == false) {
         __MovePiece__(board_ptr, from, to);
     } else {
         *doCastling = false;
         Piece_MoveCastling(board_ptr, from, to);
-    }
-    if(*doPawnPromotion != false) {
-        printf("Pawn promotion (TO BE IMPLEMENTED)\n");
-        *doPawnPromotion = false;
     }
 }
 
