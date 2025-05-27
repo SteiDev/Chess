@@ -93,3 +93,19 @@ void Debug_DumpVariables(const u16 turnCounter, const u32Vect2 boardPixelSize, c
 
     fclose(dumpFile);
 }
+
+u16 Util_u16Max(const u16 num1, const u16 num2) {
+    if(num1 > num2) {
+        return num1;
+    } else {
+        return num2;
+    }
+}
+
+u16 Util_u16Min(const u16 num1, const u16 num2) {
+    if(num1 < num2) {
+        return num1;
+    } else {
+        return num2;
+    }
+}

@@ -73,4 +73,7 @@ void Debug_DumpVariables(const u16 turnCounter, const u32Vect2 boardPixelSize, c
                         const bool validFrom, const bool validTo, const bool highlightSelection, const bool undoSelection, const bool showCoordinates, const __color_t currentCol,
                         const gameState_t gameState);
 
+u16 Util_u16Max(const u16 num1, const u16 num2);
+u16 Util_u16Min(const u16 num1, const u16 num2);
+
 #endif  // end of __GENTOOLS_H__
