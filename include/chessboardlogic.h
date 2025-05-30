@@ -90,7 +90,7 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect
  * @param XBoardCoord The X coordinates (number of lines) of the board.
  * @param YBoardCoord The Y coordinates (number of columns) of the board.
  */
-NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord);
+NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord, u16* turnCounter, __color_t* restrict currentCol, u16* moveCounter);
 
 /**
  * @brief #### Free the allocated heap memory of the main board
@@ -120,8 +120,11 @@ NONNULL void Board_Turn_NextColor(__color_t* restrict color_ptr);
  * @param YBoardCoord The Y coordinates (number of columns) of the board.
  * @param filename Name of the file containing the game save.
  */
-NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u8* restrict filename);
-
+NONNULL void Board_Save_SaveGame(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16 turnCounter, __color_t currentCol, u16 moveCounter, u8* restrict filename);
+NONNULL void Board_Save_Moves_To_PGN(PGN_Data* restrict PGNData, u16 moveCounter, u8* restrict filename);
+NONNULL void FormatMoveString(u8* outStr, u16Vect2 from, u16Vect2 to, playerPiece_t** mainBoard);
+NONNULL void Read_PGN_Header(PGN_Data* restrict PGNData, u8* restrict filename);
+NONNULL void Board_Save_PGN_Header(PGN_Data* restrict PGNData, u8* restrict filename);
 NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt);
 bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize);
 NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16Vect2* restrict from_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32Vect2 offset);

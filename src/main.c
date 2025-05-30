@@ -7,6 +7,7 @@
 #include "raylib.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #define DEBUG 1
 
@@ -34,6 +35,7 @@ i32 main() {
     pieceTextures_t blackTextures = {0};
     gameState_t gameState = checkFrom;
     boardTheme_t boardTheme = THEME_CLASSIC;
+    PGN_Data currentPGN = {0};
 
     Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &screenWidth, &screenHeight, &showCoordinates);
     
@@ -43,13 +45,15 @@ i32 main() {
     loadPreviousGame = Board_Save_LoadGame("Load previous game? (y/n)");
     if(loadPreviousGame == false) {
         layoutName = "config/layout.ini";
+        Read_PGN_Header(&currentPGN, "readMetadataPGN.txt");
+        Board_Save_PGN_Header(&currentPGN, "saves/game.pgn");
     } else {
         layoutName = "saves/gamesave.ini";
     }
     
     Graphics_CalculateBoardPixels(boardSize, &boardPixelHeight, &boardPixelWidth);
     offset = Graphics_CalculateOffset(screenWidth, screenHeight, boardPixelWidth, boardPixelHeight);
-    Board_LoadPlacement(layoutName, &mainBoard, boardSize);
+    Board_LoadPlacement(layoutName, &mainBoard, boardSize, &turnCounter, &currentCol, &currentPGN.moveCount);
     Graphics_InitRaylib(screenWidth, screenHeight, fpsMax);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
@@ -80,6 +84,7 @@ i32 main() {
                     gameState = checkTo;
                 }
                 break;
+
             case checkTo:
                 undoSelection = Board_UndoSelection(boardSize, offset);
                 validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset);
@@ -92,17 +97,28 @@ i32 main() {
                     gameState = move;
                 }
                 break;
+
             case move:
                 #ifdef DEBUG
                     Debug_DumpVariables(turnCounter, boardPixelWidth, boardPixelHeight, screenWidth, screenHeight, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
                 #endif
                 Piece_Move(&mainBoard, from, to);
+
+                u8 moveStr[16];
+                FormatMoveString(moveStr, from, to, mainBoard);
+                if(currentPGN.moveCount < MAX_MOVES){
+                    strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
+                    currentPGN.moveCount++;
+                }
+
                 Board_Turn_NextColor(&currentCol);
                 ++turnCounter;
-                Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
+                Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
                 gameState = checkFrom;
                 highlightSelection = false;
                 break;
+
             default:
             Exception_SendWarning("Warning: Invalid game state (main)\n");
         }
