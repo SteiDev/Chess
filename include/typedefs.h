@@ -131,4 +131,19 @@ typedef struct f64Vect2 {
     f64 y;
 } f64Vect2;
 
+#define MAX_STR 200
+#define MAX_MOVES 64
+
+typedef struct {
+    char event[MAX_STR];
+    char site[MAX_STR];
+    char date[11];
+    char round[MAX_STR];
+    char white[MAX_STR];
+    char black[MAX_STR];
+    char result[8];
+    char moves[MAX_MOVES][16];
+    u16 moveCount;
+} PGN_Data;
+
 #endif // end of __TYPEDEFS_H__

@@ -7,6 +7,7 @@
 #include "raylib.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #define DEBUG 1
 
@@ -37,6 +38,7 @@ i32 main() {
     pieceTextures_t pawnPromoteTextures = {0};
     gameState_t gameState = checkFrom;
     boardTheme_t boardTheme = THEME_CLASSIC;
+    PGN_Data currentPGN = {0};
 
     Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates);
     
@@ -46,13 +48,15 @@ i32 main() {
     loadPreviousGame = Board_Save_LoadGame("Load previous game? (y/n)");
     if(loadPreviousGame == false) {
         layoutName = "config/layout.ini";
+        Read_PGN_Header(&currentPGN, "readMetadataPGN.txt");
+        Board_Save_PGN_Header(&currentPGN, "saves/game.pgn");
     } else {
         layoutName = "saves/gamesave.ini";
     }
     
     boardPixelSize = Graphics_CalculateBoardPixels(boardSize);
     offset = Graphics_CalculateOffset(windowSize, boardPixelSize);
-    Board_LoadPlacement(layoutName, &mainBoard, boardSize);
+    Board_LoadPlacement(layoutName, &mainBoard, boardSize, &turnCounter, &currentCol, &currentPGN.moveCount);
     Graphics_InitRaylib(windowSize, fpsMax);
     Graphics_LoadTextures(&whiteTextures, &blackTextures);
 
@@ -83,6 +87,7 @@ i32 main() {
                     gameState = checkTo;
                 }
                 break;
+
             case checkTo:
                 undoSelection = Board_UndoSelection(boardSize, offset);
                 validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
@@ -95,10 +100,17 @@ i32 main() {
                     gameState = move;
                 }
                 break;
+
             case move:
                 #ifdef DEBUG
                     Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
                 #endif
+                u8 moveStr[16];
+                FormatMoveString(moveStr, from, to, mainBoard);
+                if(currentPGN.moveCount < MAX_MOVES){
+                    strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
+                    currentPGN.moveCount++;
+                }
                 doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, to, boardSize);
                 Piece_Move(&mainBoard, from, to, &doCastling);
                 Board_Turn_NextColor(&currentCol);
@@ -117,6 +129,7 @@ i32 main() {
                 } else {
                     gameState = checkFrom;
                     Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                    Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
                 }
 
                 highlightSelection = false;
@@ -131,6 +144,7 @@ i32 main() {
 
                 if(pawnUpgradeSelected != false) {
                     Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                    Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
                 }
 
                 /* Currently not implemented so it should skip this state */
