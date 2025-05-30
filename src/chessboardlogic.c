@@ -118,7 +118,7 @@ NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*
 
 NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord, u16* restrict turnCounter_ptr, __color_t* restrict colorCounter_ptr, u16* restrict moveCounter_ptr) {
     FILE* ini_ptr = NULL;
-    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE};
+    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE, false};
     u16Vect2 boardPlacementBuffer = {0};
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
 

@@ -128,7 +128,7 @@ i32 main() {
                     }
                 } else {
                     gameState = checkFrom;
-                    Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                    Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
                     Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
                 }
 
@@ -143,7 +143,7 @@ i32 main() {
                 /* If a piece was chosen pawnUpgradeSelected should be changed to true */
 
                 if(pawnUpgradeSelected != false) {
-                    Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                    Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
                     Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
                 }
 
