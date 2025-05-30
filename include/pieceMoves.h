@@ -6,13 +6,7 @@
 
 // [Piece movement related macros]
 
-// used for checking the return value of CheckPieceOwner
-#define INVALID_OWNER -1
-#define VALID_OWNER 0
-
-// used for checking the return value of the particular piece moves related functions
-#define INVALID_MOVE -1
-#define VALID_MOVE 0
+bool Piece_CheckOwnerDestination(playerPiece_t** restrict board, const u16Vect2 from, const u16Vect2 to);
 
 /**
  * @brief #### Move a piece to the desired location
@@ -23,7 +17,7 @@
  * @param toX The X coordinates (number of lines) of the location where the piece should be moved.
  * @param toY The Y coordinates (number of columns) of the location where the piece should be moved.
  */
-void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to);
+void Piece_Move(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to, bool* restrict doCastling);
 
 /**
  * @brief #### Check the color of the piece
@@ -46,7 +40,7 @@ bool Piece_ISOwnerValid(playerPiece_t** restrict mainBoard, const u16Vect2 from,
  * @param toY The Y coordinates (number of columns) of the location where the pawn should be moved.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to);
+bool __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to);
 
 /**
  * @brief #### Check if a knight can move
@@ -59,7 +53,7 @@ i8 __CheckValidMove_Pawn__(playerPiece_t** restrict mainBoard, const u16Vect2 fr
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Knight__(const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
+bool __CheckValidMove_Knight__(const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a bishop can move
@@ -73,7 +67,7 @@ i8 __CheckValidMove_Knight__(const u16Vect2 from, const u16Vect2 to, const u16Ve
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
+bool __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a rook can move
@@ -87,7 +81,7 @@ i8 __CheckValidMove_Bishop__(playerPiece_t** restrict mainBoard, const u16Vect2 
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
+bool __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a queen can move
@@ -101,7 +95,7 @@ i8 __CheckValidMove_Rook__(playerPiece_t** restrict mainBoard, const u16Vect2 fr
  * @param boardY The Y coordinates (number of columns) of the main board.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
+bool __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 /**
  * @brief #### Check if a king can move
@@ -112,6 +106,11 @@ i8 __CheckValidMove_Queen__(playerPiece_t** restrict mainBoard, const u16Vect2 f
  * @param toY The Y coordinates (number of columns) of the location where the knight should be moved.
  * @return INVALID_MOVE if the move isn't possible, VALID_MOVE otherwise.
  */
-i8 __CheckValidMove_King__(const u16Vect2 from, const u16Vect2 to);
+bool __CheckValidMove_King__(const u16Vect2 from, const u16Vect2 to);
+
+bool Piece_CheckCastling(playerPiece_t** restrict mainBoard, const u16Vect2 from, const u16Vect2 to);
+void Piece_ToggleSpecialMove(playerPiece_t*** board_ptr, const u16Vect2 from, const u16Vect2 to);
+void Piece_MoveCastling(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to);
+bool Piece_CheckPawnPromotion(playerPiece_t** restrict board, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
 
 #endif // __PIECEMOVES_H__

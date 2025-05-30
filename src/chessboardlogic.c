@@ -2,7 +2,6 @@
 // should go
 
 #include "../include/chessboardlogic.h"
-#include "../include/gameTexts.h"
 #include "../include/typedefs.h"
 #include "../include/gentools.h"
 #include "../include/pieceMoves.h"
@@ -18,8 +17,6 @@
 
 playerPiece_t** Board_Init(const u16Vect2 boardSize) {
     playerPiece_t** mainBoard = NULL;
-
-    printf(LOADING_MESSAGE_BOARD_EN);
 
     mainBoard = (playerPiece_t**)malloc(sizeof(playerPiece_t*) * boardSize.y);
     if(mainBoard == NULL){
@@ -38,13 +35,14 @@ playerPiece_t** Board_Init(const u16Vect2 boardSize) {
         for(u16 Xindex = 0; Xindex < boardSize.x; ++Xindex){
             mainBoard[Yindex][Xindex].pieceColor = color_NONE;
             mainBoard[Yindex][Xindex].pieceType = piece_NONE;
+            mainBoard[Yindex][Xindex].usedSpecialMove = false;
         }
     }
 
     return mainBoard;
 }
 
-NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32* screenWidth_ptr, i32* screenHeight_ptr, bool* showCoordinates_ptr) {
+NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect2* restrict boardCoord, i32* restrict fpsMax_ptr, i32Vect2* restrict screenSize_ptr, bool* showCoordinates_ptr) {
     FILE* ini_ptr = NULL;
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
     
@@ -68,12 +66,12 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "screenWidth = %d", screenWidth_ptr);
+                sscanf(ini_filecontent, "screenWidth = %d", &screenSize_ptr->x);
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
             if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "screenHeight = %d", screenHeight_ptr);
+                sscanf(ini_filecontent, "screenHeight = %d", &screenSize_ptr->y);
             }else{
                 Exception_SendWarning("Warning: Incompatible Ini file content (Board_Settings_General)\n");
             }
@@ -92,7 +90,7 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect
 /*
 NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord) {
     FILE* ini_ptr = NULL;
-    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE};
+    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE, false};
     u16Vect2 boardPlacementBuffer = {0};
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
     u16 turnCounter = 0;
@@ -103,7 +101,7 @@ NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*
     if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
         if(strcmp(ini_filecontent, "[layout]\n") != 0){  // fgets also gets the newline terminator \n
             Exception_SendWarning("Warning: Incompatible Ini file content (Board_Placement)\n");
-        }else{
+        } else {  
             while(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
                 sscanf(ini_filecontent, "piece = %c[%hu][%hu], color = %c", (u8*)&piece_Placement_Buffer.pieceType, &boardPlacementBuffer.y, &boardPlacementBuffer.x, (u8*)&piece_Placement_Buffer.pieceColor);
                 if(Exception_CheckBounds(boardPlacementBuffer.x, boardPlacementBuffer.y, boardCoord.x, boardCoord.y, false) == IN_BOUNDS){
@@ -381,48 +379,52 @@ NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 bo
     }
 }
 
-NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset) {
+NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
         f32Vect2 mousePos = Graphics_MapMouseToBoard(GetMousePosition(), boardSize.y, offset);
-        i8 validPieceMove = INVALID_MOVE;
+        bool validPieceMove = false;
         if(Board_IsInsideBoard(mousePos, boardSize) != false) {
             to_ptr->x = (u16)mousePos.x;
             to_ptr->y = (u16)mousePos.y;
 
-            switch(mainBoard[from.y][from.x].pieceType){
-                case pawn:
-                    validPieceMove = __CheckValidMove_Pawn__(mainBoard, from, *to_ptr);
-                    break;
-                case knight:
-                    validPieceMove = __CheckValidMove_Knight__(from, *to_ptr, boardSize);
-                    break;
-                case bishop:
-                    validPieceMove = __CheckValidMove_Bishop__(mainBoard, from, *to_ptr, boardSize);
-                    break;
-                case rook:
-                    validPieceMove = __CheckValidMove_Rook__(mainBoard, from, *to_ptr, boardSize);
-                    break;
-                case queen:
-                    validPieceMove = __CheckValidMove_Queen__(mainBoard, from, *to_ptr, boardSize);
-                    break;
-                case king:
-                    validPieceMove = __CheckValidMove_King__(from, *to_ptr);
-                    break;
-                default:    
-                    printf("Unimplemented (Board_Turn_Read)\n");
-                    validPieceMove = INVALID_MOVE;
-            }
-            if(validPieceMove == VALID_MOVE) {
-                return true;
+            if(Piece_CheckCastling(mainBoard, from, *to_ptr) == false) {
+                *doCastling = false;
+                if(Piece_CheckOwnerDestination(mainBoard, from, *to_ptr) != false) {
+                    switch(mainBoard[from.y][from.x].pieceType) {
+                        case pawn:
+                            validPieceMove = __CheckValidMove_Pawn__(mainBoard, from, *to_ptr);
+                            break;
+                        case knight:
+                            validPieceMove = __CheckValidMove_Knight__(from, *to_ptr, boardSize);
+                            break;
+                        case bishop:
+                            validPieceMove = __CheckValidMove_Bishop__(mainBoard, from, *to_ptr, boardSize);
+                            break;
+                        case rook:
+                            validPieceMove = __CheckValidMove_Rook__(mainBoard, from, *to_ptr, boardSize);
+                            break;
+                        case queen:
+                            validPieceMove = __CheckValidMove_Queen__(mainBoard, from, *to_ptr, boardSize);
+                            break;
+                        case king:
+                            validPieceMove = __CheckValidMove_King__(from, *to_ptr);
+                            break;
+                        default:    
+                            printf("Unimplemented (Board_Turn_Read)\n");
+                            validPieceMove = false;
+                    }
+                    return validPieceMove;
+                }
             } else {
-                return false;
+                *doCastling = true;
+                return true;
             }
-        } else {
-            return false;
+
+            
         }
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset) {
