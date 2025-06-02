@@ -333,21 +333,20 @@ NONNULL void FormatMoveString(u8* outStr, u16Vect2 from, u16Vect2 to, playerPiec
     }
 }
 
-// quick and dirty implementation that probably needs to be fixed later
-NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt){
-    u8 keyboardLetter = 0;
+// NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt){
+//     u8 keyboardLetter = 0;
 
-    printf("%s\n", loadPrompt);
-    scanf(" %c", &keyboardLetter);
+//     printf("%s\n", loadPrompt);
+//     scanf(" %c", &keyboardLetter);
 
-    keyboardLetter = toupper(keyboardLetter);
+//     keyboardLetter = toupper(keyboardLetter);
 
-    if(keyboardLetter != 'Y'){
-        return false;
-    }else{
-        return true;
-    }
-}
+//     if(keyboardLetter != 'Y'){
+//         return false;
+//     }else{
+//         return true;
+//     }
+// }
 
 bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize) {
     if((mousePos.x < 0 || mousePos.x >= boardSize.x) || (mousePos.y < 0 || mousePos.y >= boardSize.y)) {

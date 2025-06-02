@@ -1,4 +1,5 @@
 #include "../include/menus.h"
+#include "../include/gentools.h"
 
 #include "raylib.h"
 
@@ -28,6 +29,26 @@ static f32Vect2 __Menu_CalculateTextOffset__(const u8* buttonText, f32 currentY)
     return textOffset;
 }
 
+static menu_t __Menu_MapIndexToButton__(const u8_EXPLICIT buttonIndex) {
+    menu_t selectedButton = menu_NONE;
+
+    switch(buttonIndex) {
+            case 0:
+                selectedButton = inGame;
+                break;
+            case 1:
+                selectedButton = loadGame;
+                break;
+            case 2:
+                selectedButton = quit;
+                break;
+            default:
+                Exception_SendWarning("Warning: Unknown button index (__Menu_MapIndexToButton__)\n");
+    }
+
+    return selectedButton;
+}
+
 f32Vect2 Menu_CalculateButtonOffset(const i32Vect2 windowSize) {
     f32Vect2 buttonOffset = {0};
 
@@ -43,23 +64,33 @@ void Menu_PrintButtons(const f32Vect2 buttonOffset) {
     const u8* buttonText[BUTTON_COUNT] = {BUTTON_TEXT_START, BUTTON_TEXT_LOAD_GAME, BUTTON_TEXT_QUIT};
     const Color buttonColors[BUTTON_COUNT] = {BUTTON_COL_START, BUTTON_COL_LOAD_GAME, BUTTON_COL_QUIT};
 
-    for(u8_EXPLICIT buttonIdx = 0; buttonIdx < BUTTON_COUNT; ++buttonIdx) {
-        textPos = __Menu_CalculateTextOffset__(buttonText[buttonIdx], currentY);
+    for(u8_EXPLICIT buttonIndex = 0; buttonIndex < BUTTON_COUNT; ++buttonIndex) {
+        textPos = __Menu_CalculateTextOffset__(buttonText[buttonIndex], currentY);
         textPos.x += buttonOffset.x;
 
-        DrawRectangle(buttonOffset.x, currentY, BUTTON_X, BUTTON_Y, buttonColors[buttonIdx]);
-        DrawText(buttonText[buttonIdx], textPos.x, textPos.y, BUTTON_TEXT_FONT_SIZE, BUTTON_TEXT_COLOR);
+        DrawRectangle(buttonOffset.x, currentY, BUTTON_X, BUTTON_Y, buttonColors[buttonIndex]);
+        DrawText(buttonText[buttonIndex], textPos.x, textPos.y, BUTTON_TEXT_FONT_SIZE, BUTTON_TEXT_COLOR);
 
         currentY += BUTTON_Y_SPACING;
     }   
 }
 
-currentMenu_t Menu_GetSelectedMenu(const f32Vect2 buttonOffset) {
+menu_t Menu_GetSelectedMenu(const f32Vect2 buttonOffset) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) != false) {
+        f32 currentY = buttonOffset.y;
         f32Vect2 mousePos = GetMousePosition();
+        menu_t selectedMenu = menu_NONE;
 
         if(mousePos.x >= buttonOffset.x && mousePos.x <= buttonOffset.x + BUTTON_X) {
             /* now check for each button Y */
+            for(u8_EXPLICIT buttonIndex = 0; buttonIndex < BUTTON_COUNT; ++buttonIndex) {
+                if(mousePos.y >= currentY && mousePos.y <= currentY + BUTTON_Y) {
+                    selectedMenu = __Menu_MapIndexToButton__(buttonIndex);
+                    return selectedMenu;
+                }
+
+                currentY += BUTTON_Y_SPACING;
+            }
         }
     }
 

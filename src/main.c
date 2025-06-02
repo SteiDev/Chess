@@ -42,8 +42,8 @@ i32 main() {
     gameState_t gameState = checkFrom;
     boardTheme_t boardTheme = THEME_CLASSIC;
     PGN_Data currentPGN = {0};
-    currentMenu_t curMenu = start;
-    currentMenu_t selectedMenu = menu_NONE;
+    menu_t curMenu = start;
+    menu_t selectedMenu = menu_NONE;
     
     Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates);
     
@@ -54,145 +54,153 @@ i32 main() {
     boardPixelSize = Graphics_CalculateBoardPixels(boardSize);
     offset = Graphics_CalculateOffset(windowSize, boardPixelSize);
     
-    loadPreviousGame = Board_Save_LoadGame("Load previous game? (y/n)");
-    if(loadPreviousGame == false) {
-        layoutName = "config/layout.ini";
-        Read_PGN_Header(&currentPGN, "readMetadataPGN.txt");
-        Board_Save_PGN_Header(&currentPGN, "saves/game.pgn");
-    } else {
-        layoutName = "saves/gamesave.ini";
+    Graphics_InitRaylib(windowSize, fpsMax);
+    Graphics_LoadTextures(&whiteTextures, &blackTextures);
+    while(WindowShouldClose() == false) {
+        switch(curMenu) {
+            case start:
+                while(curMenu == start && WindowShouldClose() == false) {
+                    BeginDrawing();
+                    ClearBackground(BROWN);
+
+                    Menu_PrintButtons(menuButtonOffset);
+                    selectedMenu = Menu_GetSelectedMenu(menuButtonOffset);
+
+                    if(selectedMenu != menu_NONE) {
+                        curMenu = selectedMenu;
+                        selectedMenu = menu_NONE;
+                    }
+
+                    EndDrawing();
+                }
+
+                break;
+            case loadGame:
+                loadPreviousGame = true;
+                
+                curMenu = inGame;
+
+                break;
+            case inGame:
+                #ifdef DEBUG
+                    Debug_ResetDumpFile();
+                #endif
+
+                if(loadPreviousGame == false) {
+                    layoutName = "config/layout.ini";
+                    Read_PGN_Header(&currentPGN, "readMetadataPGN.txt");
+                    Board_Save_PGN_Header(&currentPGN, "saves/game.pgn");
+                } else {
+                    layoutName = "saves/gamesave.ini";
+                }
+
+                Board_LoadPlacement(layoutName, &mainBoard, boardSize, &turnCounter, &currentCol, &currentPGN.moveCount);
+
+                /* main game loop */
+                while(WindowShouldClose() == false) {
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    Graphics_DrawBoard(boardSize, offset, boardTheme);
+                    
+                    Graphics_DrawPieces(mainBoard, boardSize, whiteTextures, blackTextures, offset);
+                    Graphics_PrintTurn(turnCounter, offset, currentCol);
+
+                    if(showCoordinates != false) {
+                        Graphics_PrintCoordinates(boardSize, boardPixelSize, offset);
+                    }
+
+                    // To highlight the current selected piece
+                    if(highlightSelection != false) {
+                        DrawRectangle(offset.x + from.x * TILE_SIZE, offset.y + (boardSize.y - from.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
+                    }
+                    switch(gameState) {
+                        case checkFrom:
+                            validFrom = Board_GetFrom(mainBoard, boardSize, &from, currentCol, &highlightSelection, offset);
+                            if(validFrom != false) {
+                                gameState = checkTo;
+                            }
+                            break;
+
+                        case checkTo:
+                            undoSelection = Board_UndoSelection(boardSize, offset);
+                            validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
+
+                            if(undoSelection != false) {
+                                gameState = checkFrom;
+                                highlightSelection = false;
+                            }
+                            if(validTo != false) {
+                                gameState = move;
+                            }
+                            break;
+
+                        case move:
+                            #ifdef DEBUG
+                                Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
+                            #endif
+                            u8 moveStr[16];
+                            FormatMoveString(moveStr, from, to, mainBoard);
+                            if(currentPGN.moveCount < MAX_MOVES){
+                                strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
+                                currentPGN.moveCount++;
+                            }
+                            doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, to, boardSize);
+                            Piece_Move(&mainBoard, from, to, &doCastling);
+                            Board_Turn_NextColor(&currentCol);
+                            ++turnCounter;
+
+                            if(doPawnPromotion == true) {
+                                gameState = promotePawn;
+                                doPawnPromotion = false;
+                                pawnPromotionPos = Graphics_MapBoardToMouse(to, boardSize.y, offset);
+                        
+                                if(currentCol == white) { /* The colors are inverted because this happens after the colors are changed */
+                                    pawnPromoteTextures = blackTextures;
+                                } else {
+                                    pawnPromoteTextures = whiteTextures;
+                                }
+                            } else {
+                                gameState = checkFrom;
+                                Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
+                                Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
+                            }
+
+                            highlightSelection = false;
+                            break;
+                        case promotePawn:
+                            Graphics_PawnPromotionPopup(pawnPromotionPos, pawnPromoteTextures);
+
+                            /* Here should be a function that checks if the player clicks inside the popup window and which piece is selected 
+                                and there should be another function that actually changes the piece to the selected one on the board    */
+                            
+                            /* If a piece was chosen pawnUpgradeSelected should be changed to true */
+
+                            if(pawnUpgradeSelected != false) {
+                                Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
+                                Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
+                            }
+
+                            /* Currently not implemented so it should skip this state */
+
+                            gameState = checkFrom;
+                            break;
+                        default:
+                        Exception_SendWarning("Warning: Invalid game state (main)\n");
+                    }
+
+                    EndDrawing();
+                }
+                break;
+            case quit:
+                Graphics_UnloadTextures(&whiteTextures, &blackTextures);
+                CloseWindow();
+                Board_Free(&mainBoard, boardSize.y);
+                exit(EXIT_SUCCESS);
+                break;
+            default:
+                Exception_SendWarning("Warning: Unknown menu (main)\n");
+                abort();           
+        }
     }
     
-    Graphics_InitRaylib(windowSize, fpsMax);
-    Board_LoadPlacement(layoutName, &mainBoard, boardSize, &turnCounter, &currentCol, &currentPGN.moveCount);
-    Graphics_LoadTextures(&whiteTextures, &blackTextures);
-
-    switch(curMenu) {
-        case start:
-            while(curMenu == start && WindowShouldClose() == false) {
-                BeginDrawing();
-                ClearBackground(BROWN);
-
-                Menu_PrintButtons(menuButtonOffset);
-                selectedMenu = Menu_GetSelectedMenu(menuButtonOffset);
-
-                if(selectedMenu != menu_NONE) {
-                    curMenu = selectedMenu;
-                    selectedMenu = menu_NONE;
-                }
-
-                EndDrawing();
-            }
-
-            break;
-        case inGame:
-            #ifdef DEBUG
-                Debug_ResetDumpFile();
-            #endif
-
-            /* main game loop */
-            while(WindowShouldClose() == false) {
-                BeginDrawing();
-                ClearBackground(RAYWHITE);
-                Graphics_DrawBoard(boardSize, offset, boardTheme);
-                
-                Graphics_DrawPieces(mainBoard, boardSize, whiteTextures, blackTextures, offset);
-                Graphics_PrintTurn(turnCounter, offset, currentCol);
-
-                if(showCoordinates != false) {
-                    Graphics_PrintCoordinates(boardSize, boardPixelSize, offset);
-                }
-
-                // To highlight the current selected piece
-                if(highlightSelection != false) {
-                    DrawRectangle(offset.x + from.x * TILE_SIZE, offset.y + (boardSize.y - from.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
-                }
-                switch(gameState) {
-                    case checkFrom:
-                        validFrom = Board_GetFrom(mainBoard, boardSize, &from, currentCol, &highlightSelection, offset);
-                        if(validFrom != false) {
-                            gameState = checkTo;
-                        }
-                        break;
-
-                    case checkTo:
-                        undoSelection = Board_UndoSelection(boardSize, offset);
-                        validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
-
-                        if(undoSelection != false) {
-                            gameState = checkFrom;
-                            highlightSelection = false;
-                        }
-                        if(validTo != false) {
-                            gameState = move;
-                        }
-                        break;
-
-                    case move:
-                        #ifdef DEBUG
-                            Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
-                        #endif
-                        u8 moveStr[16];
-                        FormatMoveString(moveStr, from, to, mainBoard);
-                        if(currentPGN.moveCount < MAX_MOVES){
-                            strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
-                            currentPGN.moveCount++;
-                        }
-                        doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, to, boardSize);
-                        Piece_Move(&mainBoard, from, to, &doCastling);
-                        Board_Turn_NextColor(&currentCol);
-                        ++turnCounter;
-
-                        if(doPawnPromotion == true) {
-                            gameState = promotePawn;
-                            doPawnPromotion = false;
-                            pawnPromotionPos = Graphics_MapBoardToMouse(to, boardSize.y, offset);
-                    
-                            if(currentCol == white) { /* The colors are inverted because this happens after the colors are changed */
-                                pawnPromoteTextures = blackTextures;
-                            } else {
-                                pawnPromoteTextures = whiteTextures;
-                            }
-                        } else {
-                            gameState = checkFrom;
-                            Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
-                            Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
-                        }
-
-                        highlightSelection = false;
-                        break;
-                    case promotePawn:
-                        Graphics_PawnPromotionPopup(pawnPromotionPos, pawnPromoteTextures);
-
-                        /* Here should be a function that checks if the player clicks inside the popup window and which piece is selected 
-                            and there should be another function that actually changes the piece to the selected one on the board    */
-                        
-                        /* If a piece was chosen pawnUpgradeSelected should be changed to true */
-
-                        if(pawnUpgradeSelected != false) {
-                            Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
-                            Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
-                        }
-
-                        /* Currently not implemented so it should skip this state */
-
-                        gameState = checkFrom;
-                        break;
-                    default:
-                    Exception_SendWarning("Warning: Invalid game state (main)\n");
-                }
-
-                EndDrawing();
-            }
-            break;
-        case quit:
-            Graphics_UnloadTextures(&whiteTextures, &blackTextures);
-            CloseWindow();
-            Board_Free(&mainBoard, boardSize.y);
-            exit(EXIT_SUCCESS);
-            break;
-        default:
-            Exception_SendWarning("Warning: Unknown menu (main)\n");
-            abort();           
-    }
 }

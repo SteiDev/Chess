@@ -121,7 +121,7 @@ NONNULL void Board_Save_Moves_To_PGN(PGN_Data* restrict PGNData, u16 moveCounter
 NONNULL void FormatMoveString(u8* outStr, u16Vect2 from, u16Vect2 to, playerPiece_t** mainBoard);
 NONNULL void Read_PGN_Header(PGN_Data* restrict PGNData, u8* restrict filename);
 NONNULL void Board_Save_PGN_Header(PGN_Data* restrict PGNData, u8* restrict filename);
-NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt);
+// NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt);
 bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize);
 NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16Vect2* restrict from_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32Vect2 offset);
 NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling);
