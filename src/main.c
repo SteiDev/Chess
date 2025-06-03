@@ -51,42 +51,15 @@ i32 main() {
     while(WindowShouldClose() == false) {
         switch(curMenu) {
             case start:
-                while(curMenu == start && WindowShouldClose() == false) {
-                    BeginDrawing();
-                    ClearBackground(BROWN);
-
-                    Menu_PrintButtons(menuButtonOffset);
-                    selectedMenu = Menu_GetSelectedMenu(menuButtonOffset);
-
-                    if(selectedMenu != menu_NONE) {
-                        curMenu = selectedMenu;
-                        selectedMenu = menu_NONE;
-                    }
-
-                    EndDrawing();
-                }
-
+                Game_StartMenuLoop(&curMenu, &selectedMenu, menuButtonOffset);
                 break;
+
             case loadGame:
-                loadPreviousGame = true;
-                
-                curMenu = inGame;
-
+                Game_LoadAtContinueExistingGame(&loadPreviousGame, &curMenu);
                 break;
+
             case inGame:
-                #ifdef DEBUG
-                    Debug_ResetDumpFile();
-                #endif
-
-                if(loadPreviousGame == false) {
-                    layoutName = "config/layout.ini";
-                    Read_PGN_Header(&currentPGN, "readMetadataPGN.txt");
-                    Board_Save_PGN_Header(&currentPGN, "saves/game.pgn");
-                } else {
-                    layoutName = "saves/gamesave.ini";
-                }
-
-                Board_LoadPlacement(layoutName, &mainBoard, boardSize, &turnCounter, &currentCol, &currentPGN.moveCount);
+                Game_LoadBeforeGameLoop(loadPreviousGame, &layoutName, &currentPGN, &mainBoard, boardSize, &turnCounter, &currentCol, &currentPGN.moveCount);
 
                 /* main game loop */
                 while(WindowShouldClose() == false) {
@@ -184,10 +157,7 @@ i32 main() {
                 }
                 break;
             case quit:
-                Graphics_UnloadTextures(&whiteTextures, &blackTextures);
-                CloseWindow();
-                Board_Free(&mainBoard, boardSize.y);
-                exit(EXIT_SUCCESS);
+                Game_Exit(&whiteTextures, &blackTextures, &mainBoard, boardSize.y);
                 break;
             default:
                 Exception_SendWarning("Warning: Unknown menu (main)\n");
