@@ -10,6 +10,8 @@
 #include <string.h>
 
 #define DEBUG 1
+#define AI_COLOR black
+#define MAX_DEPTH 4
 
 i32 main() {
     playerPiece_t** mainBoard = NULL;
@@ -80,16 +82,19 @@ i32 main() {
         if(highlightSelection != false) {
             DrawRectangle(offset.x + from.x * TILE_SIZE, offset.y + (boardSize.y - from.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
         }
+        
         switch(gameState) {
             case checkFrom:
                 validFrom = Board_GetFrom(mainBoard, boardSize, &from, currentCol, &highlightSelection, offset);
                 if(validFrom != false) {
                     gameState = checkTo;
                 }
+
                 break;
 
             case checkTo:
                 undoSelection = Board_UndoSelection(boardSize, offset);
+                //printf("curentCol: %d, fromX: %d, toX: %d, fromY: %d, toY: %d\n", currentCol, from.x, to.x, from.y, to.y);
                 validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
 
                 if(undoSelection != false) {
@@ -105,6 +110,7 @@ i32 main() {
                 #ifdef DEBUG
                     Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
                 #endif
+
                 u8 moveStr[16];
                 FormatMoveString(moveStr, from, to, mainBoard);
                 if(currentPGN.moveCount < MAX_MOVES){
@@ -112,6 +118,7 @@ i32 main() {
                     currentPGN.moveCount++;
                 }
                 doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, to, boardSize);
+               
                 Piece_Move(&mainBoard, from, to, &doCastling);
                 Board_Turn_NextColor(&currentCol);
                 ++turnCounter;
@@ -121,19 +128,24 @@ i32 main() {
                     doPawnPromotion = false;
                     pawnPromotionPos = Graphics_MapBoardToMouse(to, boardSize.y, offset);
             
-                    if(currentCol == white) { /* The colors are inverted because this happens after the colors are changed */
+                    if(currentCol == white) { // The colors are inverted because this happens after the colors are changed 
                         pawnPromoteTextures = blackTextures;
                     } else {
                         pawnPromoteTextures = whiteTextures;
                     }
                 } else {
                     gameState = checkFrom;
-                    Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                    Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
                     Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
                 }
 
-                highlightSelection = false;
+                if (currentCol == AI_COLOR && gameState != aiMove) {
+                    gameState = aiMove;
+                }
+               
+                highlightSelection = false;          
                 break;
+
             case promotePawn:
                 Graphics_PawnPromotionPopup(pawnPromotionPos, pawnPromoteTextures);
 
@@ -143,14 +155,37 @@ i32 main() {
                 /* If a piece was chosen pawnUpgradeSelected should be changed to true */
 
                 if(pawnUpgradeSelected != false) {
-                    Board_Save_SaveGame(mainBoard, boardSize, "saves/gamesave.ini");
+                    Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
                     Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
                 }
 
                 /* Currently not implemented so it should skip this state */
-
-                gameState = checkFrom;
                 break;
+
+            case aiMove: {   
+                Move bestMove = FindBestMove(mainBoard, boardSize, currentCol, MAX_DEPTH);
+
+                if (IsValidMove(bestMove)) {
+                    bool doCastling = false; 
+                    Piece_Move(&mainBoard, bestMove.from, bestMove.to, &doCastling);
+                    printf("AI move: (%d,%d) -> (%d,%d)\n", bestMove.from.x, bestMove.from.y, bestMove.to.x, bestMove.to.y);
+                } else {
+                    printf("Error: AI couldn't find a valid move!\n");
+                }
+
+                Board_Turn_NextColor(&currentCol);
+
+                ++turnCounter;
+
+                if (currentCol == AI_COLOR) {
+                    gameState = aiMove;
+                } else {
+                    gameState = checkFrom;
+                }
+
+                break;
+            }
+
             default:
             Exception_SendWarning("Warning: Invalid game state (main)\n");
         }
