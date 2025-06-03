@@ -4,6 +4,7 @@
 #include "../include/graphics.h"
 #include "../include/pieceMoves.h"
 #include "../include/menus.h"
+#include "../include/gameStage.h"
 
 #include "raylib.h"
 
@@ -45,6 +46,10 @@ i32 main() {
     menu_t curMenu = start;
     menu_t selectedMenu = menu_NONE;
     
+    // "config/table_config.ini"
+
+    Game_Preload("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates);
+
     Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates);
     
     menuButtonOffset = Menu_CalculateButtonOffset(windowSize);
