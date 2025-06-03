@@ -94,7 +94,6 @@ i32 main() {
 
             case checkTo:
                 undoSelection = Board_UndoSelection(boardSize, offset);
-                //printf("curentCol: %d, fromX: %d, toX: %d, fromY: %d, toY: %d\n", currentCol, from.x, to.x, from.y, to.y);
                 validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
 
                 if(undoSelection != false) {
@@ -163,19 +162,31 @@ i32 main() {
                 break;
 
             case aiMove: {   
+                printf("\n[AI] Turn %d — AI (%c) is thinking...\n", turnCounter + 1, currentCol);
                 Move bestMove = FindBestMove(mainBoard, boardSize, currentCol, MAX_DEPTH);
+                u8 moveStr[16];
+                FormatMoveString(moveStr, bestMove.from, bestMove.to, mainBoard);
+                if(currentPGN.moveCount < MAX_MOVES) {
+                    strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
+                    currentPGN.moveCount++;
+                }
 
                 if (IsValidMove(bestMove)) {
                     bool doCastling = false; 
                     Piece_Move(&mainBoard, bestMove.from, bestMove.to, &doCastling);
-                    printf("AI move: (%d,%d) -> (%d,%d)\n", bestMove.from.x, bestMove.from.y, bestMove.to.x, bestMove.to.y);
+                    printf("[AI] Move played: (%d,%d) -> (%d,%d)%s\n",
+                        bestMove.from.x, bestMove.from.y,
+                        bestMove.to.x, bestMove.to.y,
+                        doCastling ? " [Castling]" : "");
                 } else {
-                    printf("Error: AI couldn't find a valid move!\n");
+                    printf("[Error] AI could not find a valid move!\n");
                 }
 
                 Board_Turn_NextColor(&currentCol);
 
                 ++turnCounter;
+                Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
+                Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
 
                 if (currentCol == AI_COLOR) {
                     gameState = aiMove;

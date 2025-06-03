@@ -427,7 +427,7 @@ int EvaluateBoard(playerPiece_t** board, u16Vect2 boardSize, __color_t maximizin
             }
 
             if (piece.pieceColor == maximizingColor) {
-                scoreMaximizing += pieceValue;
+                scoreMaximizing += pieceValue;  
             } else if (piece.pieceColor != color_NONE) {
                 scoreOpponent += pieceValue;
             }
@@ -442,13 +442,13 @@ int EvaluateBoard(playerPiece_t** board, u16Vect2 boardSize, __color_t maximizin
 
 int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, int depth, int alpha, int beta, bool maximizingPlayer, __color_t rootColor) {
     if (depth == 0) {
-        printf("Reached depth 0 — evaluating board from rootColor %c\n", rootColor);
+        printf("[Eval] Leaf node reached — Evaluating board for color '%c'\n", rootColor);
         return EvaluateBoard(board, boardSize, rootColor);
     }
 
     Move legalMoves[256];
     int legalMoveCount = GenerateLegalMoves(board, boardSize, currentColor, legalMoves);
-    printf("Legal moves at depth %d for color %c: %d\n", depth, currentColor, legalMoveCount);
+    printf("[Minimax] Depth %d — Color '%c' has %d legal move(s)\n", depth, currentColor, legalMoveCount);
 
     if (legalMoveCount == 0) {
         // No moves — could be checkmate or stalemate
@@ -464,7 +464,7 @@ int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, i
         // Defensive bounds check
         if (legalMoves[i].to.x >= boardSize.x || legalMoves[i].to.y >= boardSize.y ||
             legalMoves[i].from.x >= boardSize.x || legalMoves[i].from.y >= boardSize.y) {
-            printf("Invalid move: (%d,%d)->(%d,%d), skipping\n",
+            printf("[Warn] Skipping invalid move: (%d,%d) -> (%d,%d)\n",
                 legalMoves[i].from.x, legalMoves[i].from.y,
                 legalMoves[i].to.x, legalMoves[i].to.y);
             Board_Free(&boardCopy, boardSize.y);
@@ -473,10 +473,9 @@ int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, i
 
         Board_ApplyMove(boardCopy, legalMoves[i]);
 
-        printf("Trying move (%d,%d)->(%d,%d), depth %d\n",
+        printf("[Minimax] Trying move: (%d,%d) -> (%d,%d) at depth %d\n",
             legalMoves[i].from.x, legalMoves[i].from.y,
-            legalMoves[i].to.x, legalMoves[i].to.y,
-            depth);
+            legalMoves[i].to.x, legalMoves[i].to.y, depth);
 
         int score = Minimax(
             boardCopy,
@@ -486,7 +485,7 @@ int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, i
             alpha,
             beta,
             !maximizingPlayer,
-            rootColor // <== Pass unchanged rootColor
+            rootColor 
         );
 
         Board_Free(&boardCopy, boardSize.y);
@@ -500,7 +499,7 @@ int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, i
         }
 
         if (beta <= alpha) {
-            printf("Alpha-beta pruning at depth %d\n", depth);
+            printf("[Prune] Alpha-beta pruning at depth %d — alpha: %d, beta: %d\n", depth, alpha, beta);
             break;
         }
     }
@@ -512,7 +511,6 @@ int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, i
 Move FindBestMove(playerPiece_t** board, u16Vect2 boardSize, __color_t aiColor, int depth) {
     Move legalMoves[256];
     int legalMoveCount = GenerateLegalMoves(board, boardSize, aiColor, legalMoves);
-    printf("works1\n");
 
     if (legalMoveCount == 0) {
         Move nullMove = { .from = {0, 0}, .to = {0, 0} };
@@ -540,22 +538,25 @@ Move FindBestMove(playerPiece_t** board, u16Vect2 boardSize, __color_t aiColor, 
 
         Board_Free(&boardCopy, boardSize.y);
 
-        // DEBUG:
-        printf("Move %d: from (%d,%d) to (%d,%d) -> score = %d\n",
+        
+        printf("[AI] Evaluating move %d: (%d,%d) -> (%d,%d) | Score = %d\n",
             i, legalMoves[i].from.x, legalMoves[i].from.y,
             legalMoves[i].to.x, legalMoves[i].to.y, score);
-            printf("bestScore: %d\n", bestScore);
 
         if (score > bestScore) {
-            printf("bestScore: %d\n", bestScore);
-            printf("bestMoveIndex: %d\n", bestMoveIndex);
+            printf("[AI] New best move found! Move %d: (%d,%d) -> (%d,%d) | Score = %d\n",
+                i, legalMoves[i].from.x, legalMoves[i].from.y,
+                legalMoves[i].to.x, legalMoves[i].to.y, score);
             bestScore = score;
             bestMoveIndex = i;
         }
     }
 
     if (bestMoveIndex != -1) {
-        printf("legalmove[%d]: x=%d, y=%d", bestMoveIndex, legalMoves[bestMoveIndex].to.x, legalMoves[bestMoveIndex].to.y);
+        printf("[AI] Best move selected: (%d,%d) -> (%d,%d) [Index %d] | Final score = %d\n",
+            legalMoves[bestMoveIndex].from.x, legalMoves[bestMoveIndex].from.y,
+            legalMoves[bestMoveIndex].to.x, legalMoves[bestMoveIndex].to.y,
+            bestMoveIndex, bestScore);
         return legalMoves[bestMoveIndex];
     }
 
