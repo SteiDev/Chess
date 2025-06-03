@@ -45,22 +45,9 @@ i32 main() {
     PGN_Data currentPGN = {0};
     menu_t curMenu = start;
     menu_t selectedMenu = menu_NONE;
-    
-    // "config/table_config.ini"
 
-    Game_Preload("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates);
+    Game_Preload("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates, &menuButtonOffset, &mainBoard, &boardPixelSize, &offset, &whiteTextures, &blackTextures);
 
-    Board_Settings_LoadGeneral("config/table_config.ini", &boardSize, &fpsMax, &windowSize, &showCoordinates);
-    
-    menuButtonOffset = Menu_CalculateButtonOffset(windowSize);
-
-    mainBoard = Board_Init(boardSize);
-
-    boardPixelSize = Graphics_CalculateBoardPixels(boardSize);
-    offset = Graphics_CalculateOffset(windowSize, boardPixelSize);
-    
-    Graphics_InitRaylib(windowSize, fpsMax);
-    Graphics_LoadTextures(&whiteTextures, &blackTextures);
     while(WindowShouldClose() == false) {
         switch(curMenu) {
             case start:
