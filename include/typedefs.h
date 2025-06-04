@@ -146,4 +146,12 @@ typedef struct {
     u16 moveCount;
 } PGN_Data;
 
+typedef struct {
+    u16Vect2 from;
+    u16Vect2 to;
+    bool isCastling;
+    bool isPromotion;
+    //__chesspiece_t promotionPiece; 
+} Move;
+
 #endif // end of __TYPEDEFS_H__
