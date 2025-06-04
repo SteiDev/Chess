@@ -4,6 +4,7 @@
 - Add en passant
 - Add pawn promotion
 - Add support for fen and pgn file types
+- Save usedSpecialMove in a file and load it back when loading the game
 ### Important:
 - Add AI
 - Add alpha-beta pruning
