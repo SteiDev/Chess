@@ -12,7 +12,7 @@
 void Exception_SendWarning(const u8* restrict warningMsg){
     fprintf(stderr, "%s", warningMsg);
     #ifdef EXIT_ON_WARNING
-    exit(EXIT_FAILURE);
+    abort();
     #endif
 }
 
@@ -20,7 +20,7 @@ void Exception_CheckNULLPtr(void* restrict general_ptr, const u8* restrict error
     if(general_ptr == NULL){
         fprintf(stderr, "%s", errorMsg);
         #ifdef EXIT_ON_FATAL_ERROR
-        exit(EXIT_FAILURE);
+        abort();
         #endif
     }
 }

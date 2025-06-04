@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -g -Wdeprecated-declarations -pedantic-errors -Waddress -Warray-bounds -Warray-parameter -Wformat -Wimplicit -Winfinite-recursion -Wmaybe-uninitialized -Wshift-negative-value
 LIB = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-OBJ = obj/main.o obj/chessboardlogic.o obj/pieceMoves.o obj/gentools.o obj/graphics.o
+OBJ = obj/main.o obj/chessboardlogic.o obj/pieceMoves.o obj/gentools.o obj/graphics.o obj/menus.o obj/gameStage.o
 EXENAME = chessboard
 
 all: $(OBJ)
@@ -12,6 +12,12 @@ exe: $(OBJ)
 	@$(CC) $(OBJ) -o bin/$(EXENAME)
 	@rm $(OBJ)
 	@@echo Executable compilled successfully!
+
+obj/gameStage.o: src/gameStage.c
+	@$(CC) $(CFLAGS) -c $^ -o $@
+
+obj/menus.o: src/menus.c
+	@$(CC) $(CFLAGS) -c $^ -o $@
 
 obj/graphics.o: src/graphics.c
 	@$(CC) $(CFLAGS) -c $^ -o $@
