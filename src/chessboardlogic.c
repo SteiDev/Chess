@@ -86,39 +86,11 @@ NONNULL void Board_Settings_LoadGeneral(const u8* restrict ini_filename, u16Vect
     }
 
     fclose(ini_ptr);
-}
-/*
-NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord) {
-    FILE* ini_ptr = NULL;
-    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE, false};
-    u16Vect2 boardPlacementBuffer = {0};
-    u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
-    u16 turnCounter = 0;
-    
-    ini_ptr = fopen(ini_filename, "r");
-    Exception_CheckNULLPtr((FILE*)ini_ptr, "Fatal Error: Config Ini could not be opened! (Board_Placement)\n");
-    
-    if(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-        if(strcmp(ini_filecontent, "[layout]\n") != 0){  // fgets also gets the newline terminator \n
-            Exception_SendWarning("Warning: Incompatible Ini file content (Board_Placement)\n");
-        } else {  
-            while(feof(ini_ptr) == 0 && fgets(ini_filecontent, __CONFIG_INI_MAX_SIZE__, ini_ptr) != NULL){
-                sscanf(ini_filecontent, "piece = %c[%hu][%hu], color = %c", (u8*)&piece_Placement_Buffer.pieceType, &boardPlacementBuffer.y, &boardPlacementBuffer.x, (u8*)&piece_Placement_Buffer.pieceColor);
-                if(Exception_CheckBounds(boardPlacementBuffer.x, boardPlacementBuffer.y, boardCoord.x, boardCoord.y, false) == IN_BOUNDS){
-                    (*main_board_ptr)[boardPlacementBuffer.y][boardPlacementBuffer.x].pieceColor = piece_Placement_Buffer.pieceColor;
-                    (*main_board_ptr)[boardPlacementBuffer.y][boardPlacementBuffer.x].pieceType = piece_Placement_Buffer.pieceType;
-                }
-            }
-        }
-    }
-
-    fclose(ini_ptr);
-}
-*/
+}   
 
 NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*** main_board_ptr, const u16Vect2 boardCoord, u16* restrict turnCounter_ptr, __color_t* restrict colorCounter_ptr, u16* restrict moveCounter_ptr) {
     FILE* ini_ptr = NULL;
-    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE, false};
+    playerPiece_t piece_Placement_Buffer = {piece_NONE, color_NONE, 0};
     u16Vect2 boardPlacementBuffer = {0};
     u8 ini_filecontent[__CONFIG_INI_MAX_SIZE__] = {0};
 
@@ -438,3 +410,4 @@ bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset) {
         return false;
     }
 }
+ 

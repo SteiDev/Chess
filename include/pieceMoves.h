@@ -112,5 +112,12 @@ bool Piece_CheckCastling(playerPiece_t** restrict mainBoard, const u16Vect2 from
 void Piece_ToggleSpecialMove(playerPiece_t*** board_ptr, const u16Vect2 from, const u16Vect2 to);
 void Piece_MoveCastling(playerPiece_t*** restrict board_ptr, const u16Vect2 from, const u16Vect2 to);
 bool Piece_CheckPawnPromotion(playerPiece_t** restrict board, const u16Vect2 from, const u16Vect2 to, const u16Vect2 boardSize);
+int GenerateLegalMoves(playerPiece_t** restrict board, const u16Vect2 boardSize, __color_t currentColor, Move* outMoves);
+int EvaluateBoard(playerPiece_t** board, u16Vect2 boardSize, __color_t maximizingColor);
+int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, int depth, int alpha, int beta, bool maximizingPlayer, __color_t rootColor);
+void Board_ApplyMove(playerPiece_t** board, Move move);
+playerPiece_t** Board_Clone(playerPiece_t** src, u16Vect2 boardSize);
+Move FindBestMove(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, int depth);
+bool IsValidMove(Move move);
 
 #endif // __PIECEMOVES_H__

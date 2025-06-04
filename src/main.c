@@ -13,6 +13,8 @@
 #include <stdlib.h>
 
 #define DEBUG 1
+#define AI_COLOR black
+#define MAX_DEPTH 4
 
 i32 main() {
     playerPiece_t** mainBoard = NULL;
@@ -74,91 +76,150 @@ i32 main() {
                         Graphics_PrintCoordinates(boardSize, boardPixelSize, offset);
                     }
 
-                    // To highlight the current selected piece
-                    if(highlightSelection != false) {
-                        DrawRectangle(offset.x + from.x * TILE_SIZE, offset.y + (boardSize.y - from.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
-                    }
-                    switch(gameState) {
-                        case checkFrom:
-                            validFrom = Board_GetFrom(mainBoard, boardSize, &from, currentCol, &highlightSelection, offset);
-                            if(validFrom != false) {
-                                gameState = checkTo;
-                            }
-                            break;
+// <<<<<<< Stei_2
+//                     // To highlight the current selected piece
+//                     if(highlightSelection != false) {
+//                         DrawRectangle(offset.x + from.x * TILE_SIZE, offset.y + (boardSize.y - from.y - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE, ColorAlpha(YELLOW, 0.5f));
+//                     }
+//                     switch(gameState) {
+//                         case checkFrom:
+//                             validFrom = Board_GetFrom(mainBoard, boardSize, &from, currentCol, &highlightSelection, offset);
+//                             if(validFrom != false) {
+//                                 gameState = checkTo;
+//                             }
+//                             break;
 
-                        case checkTo:
-                            undoSelection = Board_UndoSelection(boardSize, offset);
-                            validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
+//                         case checkTo:
+//                             undoSelection = Board_UndoSelection(boardSize, offset);
+//                             validTo = Board_GetTo(mainBoard, boardSize, from, &to, offset, &doCastling);
 
-                            if(undoSelection != false) {
-                                gameState = checkFrom;
-                                highlightSelection = false;
-                            }
-                            if(validTo != false) {
-                                gameState = move;
-                            }
-                            break;
+//                             if(undoSelection != false) {
+//                                 gameState = checkFrom;
+//                                 highlightSelection = false;
+//                             }
+//                             if(validTo != false) {
+//                                 gameState = move;
+//                             }
+//                             break;
 
-                        case move:
-                            #ifdef DEBUG
-                                Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
-                            #endif
-                            u8 moveStr[16];
-                            FormatMoveString(moveStr, from, to, mainBoard);
-                            if(currentPGN.moveCount < MAX_MOVES){
-                                strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
-                                currentPGN.moveCount++;
-                            }
-                            doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, to, boardSize);
-                            Piece_Move(&mainBoard, from, to, &doCastling);
-                            Board_Turn_NextColor(&currentCol);
-                            ++turnCounter;
+//                         case move:
+//                             #ifdef DEBUG
+//                                 Debug_DumpVariables(turnCounter, boardPixelSize, windowSize, fpsMax, boardSize, from, to, offset, layoutName, loadPreviousGame, validFrom, validTo, highlightSelection, undoSelection, showCoordinates, currentCol, gameState);
+//                             #endif
+//                             u8 moveStr[16];
+//                             FormatMoveString(moveStr, from, to, mainBoard);
+//                             if(currentPGN.moveCount < MAX_MOVES){
+//                                 strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
+//                                 currentPGN.moveCount++;
+//                             }
+//                             doPawnPromotion = Piece_CheckPawnPromotion(mainBoard, from, to, boardSize);
+//                             Piece_Move(&mainBoard, from, to, &doCastling);
+//                             Board_Turn_NextColor(&currentCol);
+//                             ++turnCounter;
 
-                            if(doPawnPromotion == true) {
-                                gameState = promotePawn;
-                                doPawnPromotion = false;
-                                pawnPromotionPos = Graphics_MapBoardToMouse(to, boardSize.y, offset);
+//                             if(doPawnPromotion == true) {
+//                                 gameState = promotePawn;
+//                                 doPawnPromotion = false;
+//                                 pawnPromotionPos = Graphics_MapBoardToMouse(to, boardSize.y, offset);
                         
-                                if(currentCol == white) { /* The colors are inverted because this happens after the colors are changed */
-                                    pawnPromoteTextures = blackTextures;
-                                } else {
-                                    pawnPromoteTextures = whiteTextures;
-                                }
-                            } else {
-                                gameState = checkFrom;
-                                Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
-                                Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
-                            }
+//                                 if(currentCol == white) { /* The colors are inverted because this happens after the colors are changed */
+//                                     pawnPromoteTextures = blackTextures;
+//                                 } else {
+//                                     pawnPromoteTextures = whiteTextures;
+//                                 }
+//                             } else {
+//                                 gameState = checkFrom;
+//                                 Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
+//                                 Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
+//                             }
 
-                            highlightSelection = false;
-                            break;
-                        case promotePawn:
-                            Graphics_PawnPromotionPopup(pawnPromotionPos, pawnPromoteTextures);
+//                             highlightSelection = false;
+//                             break;
+//                         case promotePawn:
+//                             Graphics_PawnPromotionPopup(pawnPromotionPos, pawnPromoteTextures);
 
-                            /* Here should be a function that checks if the player clicks inside the popup window and which piece is selected 
-                                and there should be another function that actually changes the piece to the selected one on the board    */
+//                             /* Here should be a function that checks if the player clicks inside the popup window and which piece is selected 
+//                                 and there should be another function that actually changes the piece to the selected one on the board    */
                             
-                            /* If a piece was chosen pawnUpgradeSelected should be changed to true */
+//                             /* If a piece was chosen pawnUpgradeSelected should be changed to true */
 
-                            if(pawnUpgradeSelected != false) {
-                                Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
-                                Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
-                            }
+//                             if(pawnUpgradeSelected != false) {
+//                                 Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
+//                                 Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
+//                             }
 
-                            /* Currently not implemented so it should skip this state */
+//                             /* Currently not implemented so it should skip this state */
 
-                            gameState = checkFrom;
-                            break;
-                        default:
-                        Exception_SendWarning("Warning: Invalid game state (main)\n");
-                    }
+//                             gameState = checkFrom;
+//                             break;
+//                         default:
+//                         Exception_SendWarning("Warning: Invalid game state (main)\n");
+//                     }
+// =======
+//                 if (currentCol == AI_COLOR && gameState != aiMove) {
+//                     gameState = aiMove;
+//                 }
+               
+//                 highlightSelection = false;          
+//                 break;
+
+//             case promotePawn:
+//                 Graphics_PawnPromotionPopup(pawnPromotionPos, pawnPromoteTextures);
+
+//                 /* Here should be a function that checks if the player clicks inside the popup window and which piece is selected 
+//                     and there should be another function that actually changes the piece to the selected one on the board    */
+                
+//                 /* If a piece was chosen pawnUpgradeSelected should be changed to true */
+// >>>>>>> master
 
                     EndDrawing();
                 }
+// <<<<<<< Stei_2
+//                 break;
+//             case quit:
+//                 Game_Exit(&whiteTextures, &blackTextures, &mainBoard, boardSize.y);
+// =======
+
+//                 /* Currently not implemented so it should skip this state */
+//                 break;
+
+//             case aiMove: {   
+//                 printf("\n[AI] Turn %d — AI (%c) is thinking...\n", turnCounter + 1, currentCol);
+//                 Move bestMove = FindBestMove(mainBoard, boardSize, currentCol, MAX_DEPTH);
+//                 u8 moveStr[16];
+//                 FormatMoveString(moveStr, bestMove.from, bestMove.to, mainBoard);
+//                 if(currentPGN.moveCount < MAX_MOVES) {
+//                     strcpy(currentPGN.moves[currentPGN.moveCount], moveStr);
+//                     currentPGN.moveCount++;
+//                 }
+
+//                 if (IsValidMove(bestMove)) {
+//                     bool doCastling = false; 
+//                     Piece_Move(&mainBoard, bestMove.from, bestMove.to, &doCastling);
+//                     printf("[AI] Move played: (%d,%d) -> (%d,%d)%s\n",
+//                         bestMove.from.x, bestMove.from.y,
+//                         bestMove.to.x, bestMove.to.y,
+//                         doCastling ? " [Castling]" : "");
+//                 } else {
+//                     printf("[Error] AI could not find a valid move!\n");
+//                 }
+
+//                 Board_Turn_NextColor(&currentCol);
+
+//                 ++turnCounter;
+//                 Board_Save_SaveGame(mainBoard, boardSize, turnCounter, currentCol, currentPGN.moveCount, "saves/gamesave.ini");
+//                 Board_Save_Moves_To_PGN(&currentPGN, currentPGN.moveCount - 1, "saves/game.pgn");
+
+//                 if (currentCol == AI_COLOR) {
+//                     gameState = aiMove;
+//                 } else {
+//                     gameState = checkFrom;
+//                 }
+
+// >>>>>>> master
                 break;
-            case quit:
-                Game_Exit(&whiteTextures, &blackTextures, &mainBoard, boardSize.y);
-                break;
+            }
+
             default:
                 Exception_SendWarning("Warning: Unknown menu (main)\n");
                 abort();           

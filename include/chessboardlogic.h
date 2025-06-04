@@ -50,7 +50,8 @@ typedef enum gameState_t {
     checkFrom,
     checkTo,
     move,
-    promotePawn
+    promotePawn,
+    aiMove
 } gameState_t;
 
 // [Board related functions]
