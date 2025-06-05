@@ -127,5 +127,7 @@ bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize);
 NONNULL bool Board_GetFrom(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, u16Vect2* restrict from_ptr, const __color_t currentPlayerCol, bool* restrict highlightSelection, const f32Vect2 offset);
 NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boardSize, const u16Vect2 from, u16Vect2* restrict to_ptr, const f32Vect2 offset, bool* restrict doCastling);
 bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset);
+bool Board_Load_Moves_From_PGN(PGN_Data* pgn, const char* filename);
+bool Board_InterpretMoveString(const char* move, u16Vect2* from, u16Vect2* to);
 
 #endif // __CHESSBOARDLOGIC_H__

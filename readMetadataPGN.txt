@@ -1,9 +1,1 @@
-[Event "F/S Return Match"] 
-[Site "Belgrade, Serbia JUG"] 
-[Date "1992.11.04"] 
-[Round "29"] 
-[White "Fischer, Robert J."] 
-[Black "Spassky, Boris V."] 
-[Result "1/2-1/2"] 
-
-1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4 Nbd7 11. c4 c6 12. cxb5 axb5 13. Nc3 Bb7 14. Bg5 b4 15. Nb1 h6 16. Bh4 c5 17. dxe5 Nxe4 18. Bxe7 Qxe7 19. exd6 Qf6 20. Nbd2 Nxd6 21. Nc4 Nxc4 22. Bxc4 Nb6 23. Ne5 Rae8 24. Bxf7+ Rxf7 25. Nxf7 Rxe1+ 26. Qxe1 Kxf7 27. Qe3 Qg5 28. Qxg5 hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33. f3 Bc8 34. Kf2 Bf5 35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5 40. Rd6 Kc5 41. Ra6 Nf2 42. g4 Bd3 43. Re6 1/2-1/2 
+1. e2e4 e7e5 2. g1f3 b8c6 3. f1c4 g8f6 4. d2d3 f8c5 5. c2c3 d7d6 6. b1d2 c8g4 7. h2h3 g4h5 8. d1b3 b7b6 9. c1b2 a7a6 10. a2a4 b6b5 11. a4b5 a6b5 12. b3a2 a8b8 13. a2a6 d8d7 14. a6a1 b8b7 15. a1a6 d7d8 16. a6a2 f6a5 17. a2a1 a5c4 18. a1a6 b7b6 19. a6a2 a8a7 20. a2a1 a7b7 21. a1a6 d8b8 22. a6a2 b7b6 23. a2a1 b6b7 24. a1a6 b7b6 25. a6a2 b6b7 26. a2a1 b7b6 27. a1a6 b6b7 28. a6a2 b7b6 29. a2a1 b6b7 30. a1a6 b7b6 31. a6a2 b6b7 32. a2a1 b7b6 33. a1a6 b6b7 34. a6a2 b7b6 35. a2a1 b6b7 36. a1a6 b7b6 37. a6a2 b6b7 38. a2a1 b7b6 39. a1a6 b6b7 40. a6a2 b7b6 41. a2a1 b6b7 42. a1a6 b7b6 43. a6a2 b6b7 44. a2a1 b7b6 45. a1a6 b6b7 46. a6a2 b7b6 47. a2a1 b6b7 48. a1a6 b7b6 49. a6a2 b6b7 50. a2a1 b7b6 51. a1a6 b6b7 52. a6a2 b7b6 53. a2a1 b6b7 54. a1a6 b7b6 55. a6a2 b6b7 56. a2a1 b7b6 57. a1a6 b6b7 58. a6a2 b7b6 59. a2a1 b6b7 60. a1a6 b7b6

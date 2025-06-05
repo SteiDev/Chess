@@ -5,6 +5,7 @@
 #include "../include/gentools.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 void Game_Preload(const u8* configFilename, u16Vect2* boardSize_ptr, i32* fpsMax_ptr, i32Vect2* windowSize_ptr, bool* showCoordinates_ptr, f32Vect2* menuButtonOffset_ptr, playerPiece_t*** mainBoard_ptr, u32Vect2* boardPixelSize_ptr, f32Vect2* offset_ptr, pieceTextures_t* whiteTextures_ptr, pieceTextures_t* blackTextures_ptr) {
     Board_Settings_LoadGeneral(configFilename, boardSize_ptr, fpsMax_ptr, windowSize_ptr, showCoordinates_ptr);
@@ -32,7 +33,7 @@ void Game_LoadAtContinueExistingGame(bool* loadPreviousGame_ptr, menu_t* curMenu
                 
     *curMenu_ptr = inGame;
 }
-
+/*
 void Game_StartMenuLoop(menu_t* curMenu_ptr, menu_t* selectedMenu_ptr, const f32Vect2 menuButtonOffset) {
     while(*curMenu_ptr == start && WindowShouldClose() == false) {
         BeginDrawing();
@@ -46,6 +47,23 @@ void Game_StartMenuLoop(menu_t* curMenu_ptr, menu_t* selectedMenu_ptr, const f32
             *selectedMenu_ptr = menu_NONE;
         }
 
+        EndDrawing();
+    }
+}
+    */
+   void Game_StartMenuLoop(menu_t* curMenu_ptr, menu_t* selectedMenu_ptr, const f32Vect2 menuButtonOffset) {
+    while(*curMenu_ptr == start && !WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(BROWN);
+        
+        Menu_PrintButtons(menuButtonOffset);
+        *selectedMenu_ptr = Menu_GetSelectedMenu(menuButtonOffset);
+        
+        if(*selectedMenu_ptr != menu_NONE) {
+            *curMenu_ptr = *selectedMenu_ptr;
+            break;  // Exit the loop after selection
+        }
+        
         EndDrawing();
     }
 }

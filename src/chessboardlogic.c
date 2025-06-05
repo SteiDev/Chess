@@ -411,3 +411,55 @@ bool Board_UndoSelection(const u16Vect2 boardSize, const f32Vect2 offset) {
     }
 }
  
+bool Board_Load_Moves_From_PGN(PGN_Data* pgn, const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (!file) return false;
+
+    char buffer[512];
+    size_t moveCount = 0;
+
+    while (fgets(buffer, sizeof(buffer), file)) {
+        char* token = strtok(buffer, " \n\r\t");
+        while (token && moveCount < MAX_MOVES) {
+            // Skip move numbers (e.g., "1.", "2.") and ignore empty tokens
+            if (isdigit(token[0]) && token[strlen(token) - 1] == '.') {
+                token = strtok(NULL, " \n\r\t");
+                continue;
+            }
+
+            // Copy simple move like "e2e4"
+            if (strlen(token) >= 4 && strlen(token) <= 5) {
+                strncpy(pgn->moves[moveCount], token, sizeof(pgn->moves[moveCount]) - 1);
+                pgn->moves[moveCount][sizeof(pgn->moves[moveCount]) - 1] = '\0';
+                moveCount++;
+            }
+
+            token = strtok(NULL, " \n\r\t");
+        }
+    }
+
+    pgn->moveCount = moveCount;
+    fclose(file);
+    return true;
+}
+
+bool Board_InterpretMoveString(const char* move, u16Vect2* from, u16Vect2* to) {
+    if (!move || strlen(move) < 4) return false;
+
+    // Convert "e2e4" to from = (4, 6), to = (4, 4)
+    char fFile = tolower(move[0]);
+    char fRank = move[1];
+    char tFile = tolower(move[2]);
+    char tRank = move[3];
+
+    if (fFile < 'a' || fFile > 'h' || fRank < '1' || fRank > '8') return false;
+    if (tFile < 'a' || tFile > 'h' || tRank < '1' || tRank > '8') return false;
+
+    from->x = fFile - 'a';
+    from->y = 8 - (fRank - '0');
+
+    to->x = tFile - 'a';
+    to->y = 8 - (tRank - '0');
+
+    return true;
+}

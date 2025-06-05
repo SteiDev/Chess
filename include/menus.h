@@ -8,6 +8,7 @@ typedef enum menu_t {
     inGame,
     loadGame,
     quit,
+    watch,
     menu_NONE
 } menu_t;
 

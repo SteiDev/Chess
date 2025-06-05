@@ -5,16 +5,18 @@
 
 #define BUTTON_X 250
 #define BUTTON_Y 100
-#define BUTTON_COUNT 3
+#define BUTTON_COUNT 4
 #define BUTTON_Y_SPACING BUTTON_Y * 1.5
 
 #define BUTTON_COL_START GREEN
 #define BUTTON_COL_LOAD_GAME YELLOW
 #define BUTTON_COL_QUIT RED
+#define BUTTON_COL_WATCH BLUE
 
 #define BUTTON_TEXT_START "Start"
-#define BUTTON_TEXT_LOAD_GAME "Load an existing game"
-#define BUTTON_TEXT_QUIT "Quit game"
+#define BUTTON_TEXT_LOAD_GAME "Load an Existing Game"
+#define BUTTON_TEXT_WATCH "Watch Game"
+#define BUTTON_TEXT_QUIT "Quit Game"
 
 #define BUTTON_TEXT_FONT_SIZE 20
 #define BUTTON_TEXT_COLOR BLACK
@@ -33,17 +35,20 @@ static menu_t __Menu_MapIndexToButton__(const u8_EXPLICIT buttonIndex) {
     menu_t selectedButton = menu_NONE;
 
     switch(buttonIndex) {
-            case 0:
-                selectedButton = inGame;
-                break;
-            case 1:
-                selectedButton = loadGame;
-                break;
-            case 2:
-                selectedButton = quit;
-                break;
-            default:
-                Exception_SendWarning("Warning: Unknown button index (__Menu_MapIndexToButton__)\n");
+        case 0:
+            selectedButton = inGame;
+            break;
+        case 1:
+            selectedButton = loadGame;
+            break;
+        case 2:
+            selectedButton = watch;  
+            break;
+        case 3:
+            selectedButton = quit;
+            break;
+        default:
+            Exception_SendWarning("Warning: Unknown button index (__Menu_MapIndexToButton__)\n");
     }
 
     return selectedButton;
@@ -61,8 +66,8 @@ f32Vect2 Menu_CalculateButtonOffset(const i32Vect2 windowSize) {
 void Menu_PrintButtons(const f32Vect2 buttonOffset) {
     f32 currentY = buttonOffset.y;
     f32Vect2 textPos = {0};
-    const u8* buttonText[BUTTON_COUNT] = {BUTTON_TEXT_START, BUTTON_TEXT_LOAD_GAME, BUTTON_TEXT_QUIT};
-    const Color buttonColors[BUTTON_COUNT] = {BUTTON_COL_START, BUTTON_COL_LOAD_GAME, BUTTON_COL_QUIT};
+    const u8* buttonText[BUTTON_COUNT] = {BUTTON_TEXT_START, BUTTON_TEXT_LOAD_GAME, BUTTON_TEXT_WATCH, BUTTON_TEXT_QUIT};
+    const Color buttonColors[BUTTON_COUNT] = {BUTTON_COL_START, BUTTON_COL_LOAD_GAME, BUTTON_COL_WATCH, BUTTON_COL_QUIT};
 
     for(u8_EXPLICIT buttonIndex = 0; buttonIndex < BUTTON_COUNT; ++buttonIndex) {
         textPos = __Menu_CalculateTextOffset__(buttonText[buttonIndex], currentY);
@@ -96,3 +101,4 @@ menu_t Menu_GetSelectedMenu(const f32Vect2 buttonOffset) {
 
     return menu_NONE;
 }
+

@@ -60,7 +60,7 @@ i32 main() {
                 Game_LoadAtContinueExistingGame(&loadPreviousGame, &curMenu);
                 break;
 
-            case inGame:
+            case inGame: 
                 Game_LoadBeforeGameLoop(loadPreviousGame, &layoutName, &currentPGN, &mainBoard, boardSize, &turnCounter, &currentCol, &currentPGN.moveCount);
 
                 /* main game loop */
@@ -198,17 +198,101 @@ i32 main() {
 
                     EndDrawing();
                 }
+                Board_Free(&mainBoard, boardSize.y);
                 break;
+                
+            case watch: {
+                    static bool playbackInitialized = false;
+                    static PGN_Data playbackPGN = {0};
+                    static u32 moveIndex = 0;
+                    static i32 frameCounter = 0;
+
+                    if (!playbackInitialized) {
+                        mainBoard = Board_Init(boardSize);
+
+                        const char* layoutFilename = "config/layout.ini";  
+                        u16 turnCounterTemp = 1;
+                        __color_t currentColTemp = white;
+                        u16 moveCountTemp = 0;
+
+                        Board_LoadPlacement(
+                            (const u8*)layoutFilename,
+                            &mainBoard,
+                            boardSize,
+                            &turnCounterTemp,
+                            &currentColTemp,
+                            &moveCountTemp
+                        );
+
+                        if (!Board_Load_Moves_From_PGN(&playbackPGN, "readMetadataPGN.txt")) {
+                            printf("[Watch] Failed to load PGN.\n");
+                            curMenu = start;
+                            break;
+                        }
+
+                        moveIndex = 0;
+                        frameCounter = 0;
+                        turnCounter = 1;
+                        currentCol = white;
+                        playbackInitialized = true;
+                    }
+
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+
+                    Graphics_DrawBoard(boardSize, offset, boardTheme);
+                    Graphics_DrawPieces(mainBoard, boardSize, whiteTextures, blackTextures, offset);
+                    Graphics_PrintTurn(turnCounter, offset, currentCol);
+
+                    const int frameDelay = 180;  // Adjust this value for playback speed
+
+                    if (moveIndex >= playbackPGN.moveCount) {
+                        DrawText("End of game. Press Enter or click to return...",
+                                100, 100, 20, RED);
+
+                        if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                            Board_Free(&mainBoard, boardSize.y);
+                            playbackInitialized = false;
+                            curMenu = start;
+                        }
+                    } else {
+                        if (++frameCounter >= frameDelay) {
+                            frameCounter = 0;
+
+                            u16Vect2 from, to;
+                            if (Board_InterpretMoveString(playbackPGN.moves[moveIndex], &from, &to)) {
+                                bool doCastling = false;
+                                Piece_Move(&mainBoard, from, to, &doCastling);
+                                Board_Turn_NextColor(&currentCol);
+                                moveIndex++;
+                                turnCounter++;
+                            } else {
+                                printf("[Watch] Invalid move in PGN: %s\n", playbackPGN.moves[moveIndex]);
+                                Board_Free(&mainBoard, boardSize.y);
+                                playbackInitialized = false;
+                                curMenu = start;
+                            }
+                        }
+                    }
+
+                    EndDrawing();
+                    break;
+                }
 
             case quit:
                 Game_Exit(&whiteTextures, &blackTextures, &mainBoard, boardSize.y);
                 break;
+                
+             case menu_NONE: {
+                WaitTime(0.016); 
+                break;
+            }
 
             default:
                 Exception_SendWarning("Warning: Unknown menu (main)\n");
-                abort();           
-            
+                curMenu=start;
+                break;
+                //abort();           
         }
     }
-    
 }
