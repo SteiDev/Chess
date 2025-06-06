@@ -54,7 +54,7 @@ void Game_StartMenuLoop(menu_t* curMenu_ptr, menu_t* selectedMenu_ptr, const f32
    void Game_StartMenuLoop(menu_t* curMenu_ptr, menu_t* selectedMenu_ptr, const f32Vect2 menuButtonOffset) {
     while(*curMenu_ptr == start && !WindowShouldClose()) {
         BeginDrawing();
-        ClearBackground(BROWN);
+        ClearBackground(GRAY);
         
         Menu_PrintButtons(menuButtonOffset);
         *selectedMenu_ptr = Menu_GetSelectedMenu(menuButtonOffset);

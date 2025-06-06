@@ -507,7 +507,6 @@ int Minimax(playerPiece_t** board, u16Vect2 boardSize, __color_t currentColor, i
     return bestScore;
 }
 
-
 Move FindBestMove(playerPiece_t** board, u16Vect2 boardSize, __color_t aiColor, int depth) {
     Move legalMoves[256];
     int legalMoveCount = GenerateLegalMoves(board, boardSize, aiColor, legalMoves);
@@ -537,7 +536,6 @@ Move FindBestMove(playerPiece_t** board, u16Vect2 boardSize, __color_t aiColor, 
         );
 
         Board_Free(&boardCopy, boardSize.y);
-
         
         printf("[AI] Evaluating move %d: (%d,%d) -> (%d,%d) | Score = %d\n",
             i, legalMoves[i].from.x, legalMoves[i].from.y,

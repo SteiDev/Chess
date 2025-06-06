@@ -126,7 +126,7 @@ NONNULL void Board_LoadPlacement(const u8* restrict ini_filename, playerPiece_t*
         }
 
         if (inTurnsSection) {
-            u16 tmpTurn = 0;
+            u16 tmpTurn = 0; 
             u16 tmpMove = 0;
             char tmpColor = 0;
             if (sscanf((char*)ini_filecontent, "turn = %hu", &tmpTurn) == 1) {
@@ -305,21 +305,6 @@ NONNULL void FormatMoveString(u8* outStr, u16Vect2 from, u16Vect2 to, playerPiec
     }
 }
 
-// NONNULL bool Board_Save_LoadGame(u8* restrict loadPrompt){
-//     u8 keyboardLetter = 0;
-
-//     printf("%s\n", loadPrompt);
-//     scanf(" %c", &keyboardLetter);
-
-//     keyboardLetter = toupper(keyboardLetter);
-
-//     if(keyboardLetter != 'Y'){
-//         return false;
-//     }else{
-//         return true;
-//     }
-// }
-
 bool Board_IsInsideBoard(const f32Vect2 mousePos, const u16Vect2 boardSize) {
     if((mousePos.x < 0 || mousePos.x >= boardSize.x) || (mousePos.y < 0 || mousePos.y >= boardSize.y)) {
         return false;
@@ -390,8 +375,6 @@ NONNULL bool Board_GetTo(playerPiece_t** restrict mainBoard, const u16Vect2 boar
                 *doCastling = true;
                 return true;
             }
-
-            
         }
     }
 
@@ -427,7 +410,6 @@ bool Board_Load_Moves_From_PGN(PGN_Data* pgn, const char* filename) {
                 continue;
             }
 
-            // Copy simple move like "e2e4"
             if (strlen(token) >= 4 && strlen(token) <= 5) {
                 strncpy(pgn->moves[moveCount], token, sizeof(pgn->moves[moveCount]) - 1);
                 pgn->moves[moveCount][sizeof(pgn->moves[moveCount]) - 1] = '\0';
